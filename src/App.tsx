@@ -1,10 +1,11 @@
+import BoardsDesign from "./components/ui/BoardsDesign"
+
 function App() {
 
 
   return (
     <div >
-     
-      <h1 className="bg-red-200">Vite + React</h1>
+     <BoardsDesign></BoardsDesign>
   
     </div>
   )
