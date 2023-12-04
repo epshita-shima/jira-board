@@ -7,118 +7,73 @@ import {
   Droppable,
 } from "react-beautiful-dnd";
 import { v4 as uuidv4 } from "uuid";
-const flowersList = [
-  {
-    id: "1",
-    name: "Orchid",
-  },
-  {
-    id: "2",
-    name: "Carnation",
-  },
-  {
-    id: "3",
-    name: "Lily",
-  },
-  {
-    id: "4",
-    name: "Tulip",
-  },
-];
-const flower = {
-  ["1"]: {
-    name: "To do",
-    listData: flowersList,
-  },
-};
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { IAllTask } from "../../types/taskType";
+import { moveTask } from "../../redux/features/treeViews/treeviewSlice";
+import { ISingleTask } from "../../types/singleTask";
 
-// {
-//   id: "2",
-//   name: "In progress",
-//   listData: [flowersList],
-// },
-// {
-//   id: "3",
-//   name: "Unit test",
-//   listData: [flowersList],
-// },
-// {
-//   id: "4",
-//   name: "Quality Assurance (QA)",
-//   listData: [flowersList],
-// },
-// {
-//   id: "4",
-//   name: "Complete",
-//   listData: [flowersList],
-// },
 const Treeview = () => {
-  const [flowerState, setFlowerState] = useState(flower);
+
+  const flowerState = useSelector((state:IAllTask) => state.treeview.flower);
+  console.log(flowerState)
+  const dispatch = useDispatch();
+  // const [flowerState, setFlowerState] = useState(flower);
   console.log(flowerState);
   const onDragEnd = (result) => {
     if (!result.destination) return;
     const { source, destination } = result;
-    console.log(source.droppableId);
-    // const sourceIndex = result.source.index;
-    // const destinationIndex = result.destination.index;
-    // const sourceListId = result.source.droppableId;
-    // const destinationListId = result.destination.droppableId;
+    console.log(result)
+    dispatch(moveTask(source.droppableId));
+  }
+//   const onDragEnd = (result) => {
+//     if (!result.destination) return;
+//     // console.log(source.droppableId);
+//     const sourceIndex = result.source.index;
+//     const destinationIndex = result.destination.index;
+//     const sourceListId = result.source.droppableId;
+//     const destinationListId = result.destination.droppableId;
 
-    // if (sourceListId === destinationListId) {
-    //   // If the drag and drop is within the same list
-    //   console.log(sourceListId)
-    //   const newListData =Object.entries(flower).map(([id, column]) =>(
-    //     column.listData[0]
-    //    ));
-    //   const newListDataa = [...flowerState[sourceListId].newListData];
-    //   const [removed] = newListDataa.splice(sourceIndex, 1);
-    //   newListDataa.splice(destinationIndex, 0, removed);
+//     if (sourceListId === destinationListId) {
+//       console.log(sourceListId)
 
-    //   setFlowerState({
-    //     ...flowerState,
-    //     [sourceListId]: {
-    //       ...flowerState[sourceListId],
-    //       listData: newListData,
-    //     },
-    //   });
-    // } else {
-    // If the drag and drop is between different lists
-    //   const sourceListData = [...flowerState[sourceListId].listData];
-    //   const destinationListData = [...flowerState[destinationListId].listData];
-    //   const [removed] = sourceListData.splice(sourceIndex, 1);
-    //   destinationListData.splice(destinationIndex, 0, removed);
+//     const newListDataID = flowerState[sourceListId];
+//     const newListData = [...newListDataID.listData];
+//     const [removed] = newListData.splice(sourceIndex, 1);
+//     newListData.splice(destinationIndex, 0, removed);
+//     console.log(newListData);
+//     setFlowerState({
+//       ...flowerState,
+//       [sourceListId]: {
+//         ...newListDataID,
+//         listData: newListData,
+//       },
+  
+//   })
+//     }
+//      else {
+ 
+//       const sourceListData = [...flowerState[sourceListId].listData];
+//       const destinationListData = [...flowerState[destinationListId].listData];
+//       const [removed] = sourceListData.splice(sourceIndex, 1);
+//       destinationListData.splice(destinationIndex, 0, removed);
 
-    //   setFlowerState({
-    //     ...flowerState,
-    //     [sourceListId]: {
-    //       ...flowerState[sourceListId],
-    //       listData: sourceListData,
-    //     },
-    //     [destinationListId]: {
-    //       ...flowerState[destinationListId],
-    //       listData: destinationListData,
-    //     },
-    //   });
-    console.log(flowerState[source.droppableId]);
-    const column = flowerState[source.droppableId];
-    const copiedItems = [...column.listData];
-    const [removed] = copiedItems.splice(source.index, 1);
-    copiedItems.splice(destination.index, 0, removed);
-    console.log(copiedItems);
-    setFlowerState({
-      ...flowerState,
-      [source.droppableId]: {
-        ...column,
-        listData: copiedItems,
-      },
-    });
-    // }
-  };
+//       setFlowerState({
+//         ...flowerState,
+//         [sourceListId]: {
+//           ...flowerState[sourceListId],
+//           listData: sourceListData,
+//         },
+//         [destinationListId]: {
+//           ...flowerState[destinationListId],
+//           listData: destinationListData,
+//         },
+//       });
+// }}
   return (
-    <div className="mx-auto  text-[20px] bg-emerald-700  mt-10 p-10 text-white w-[500px] flex justify-center">
+    <div className="mx-auto  text-[20px]  text-white  flex justify-center">
       <DragDropContext onDragEnd={onDragEnd}>
         {Object.entries(flowerState).map(([listId, column]) => {
-          console.log(listId, column);
           return (
             <Droppable droppableId={listId} key={listId}>
               {(provided) => {
@@ -126,15 +81,13 @@ const Treeview = () => {
                   <ul className="tree">
                     <li>
                       <details open>
-                        
                         <summary>{column.name} <span className="text-[20px]">+</span> </summary>
                         <ul
                           className="m-8"
                           {...provided.droppableProps}
                           ref={provided.innerRef}
                         >
-                          {column?.listData?.map((item, index) => {
-                            console.log(item.id);
+                          {column?.listData?.map((item:ISingleTask, index:number) => {
                             return (
                               <Draggable
                                 key={item.id}
@@ -149,6 +102,7 @@ const Treeview = () => {
                                       {...provided.dragHandleProps}
                                     >
                                       {item?.name}
+                                     
                                     </li>
                                   );
                                 }}

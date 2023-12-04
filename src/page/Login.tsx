@@ -1,4 +1,12 @@
+import { useParams } from "react-router-dom";
+import { useSingleTaskQuery } from "../redux/api/apiSlice";
 
 export default function Login() {
-  return <div>Login</div>;
+  const{id}=useParams()
+  console.log(id)
+  const {data}=useSingleTaskQuery(id)
+  console.log(data)
+  return <div>
+
+  </div>;
 }

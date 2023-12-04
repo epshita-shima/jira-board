@@ -1,13 +1,16 @@
 // import BoardsDesign from "./components/ui/BoardsDesign"
-import Treeview from "./components/ui/Treeview"
+import ShowTask from "./components/ui/ShowTask"
+import AddTask from "./redux/features/AddTask/AddTask"
 
 function App() {
 
 
   return (
-    <div >
+    <div className="bg-emerald-700  mt-10 p-10 w-[1000px] mx-auto font-serif" >
      {/* <BoardsDesign></BoardsDesign> */}
-  <Treeview></Treeview>
+     <AddTask></AddTask>
+  {/* <Treeview></Treeview> */}
+  <ShowTask></ShowTask>
     </div>
   )
 }
