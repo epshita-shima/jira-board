@@ -15,7 +15,9 @@ import { faLock } from "@fortawesome/free-solid-svg-icons/faLock";
 import { faXmark } from "@fortawesome/free-solid-svg-icons/faXmark";
 import { faPenToSquare } from "@fortawesome/free-solid-svg-icons/faPenToSquare";
 import { faUnlock } from "@fortawesome/free-solid-svg-icons/faUnlock";
-import UpdateTakModal from "../UpdateTakModal";
+import UpdateTakModal from "../ui/UpdateTakModal";
+import { faCircle } from "@fortawesome/free-regular-svg-icons";
+import { faGgCircle } from "@fortawesome/free-brands-svg-icons";
 
 const ShowTask = () => {
   const [showModal, setShowModal] = useState(false);
@@ -29,12 +31,22 @@ const ShowTask = () => {
   const [openTask] = useOpenTaskMutation();
   const [close, setClose] = useState(false);
   const [completeTask, setCompleteTask] = useState([]);
-  console.log(completeTask);
+  const [startDate, setStartDate] = useState(new Date());
 
-  useEffect(() => {
-    setCompleteTask(data?.filter((d) => d?.status != "open"));
-  }, [setCompleteTask, data]);
+  const date_data = startDate;
+  const newDate = new Date(date_data);
+  const year = newDate.toLocaleString("default", {
+    year: "numeric",
+  });
+  const month = newDate.toLocaleString("default", {
+    month: "2-digit",
+  });
+  const day = newDate.toLocaleString("default", {
+    day: "2-digit",
+  });
+  const formattedDate = year + "-" + month + "-" + day;
 
+console.log(singleItem)
   useEffect(() => {
     setSingleItem(singleData);
   }, [singleData]);
@@ -44,7 +56,6 @@ const ShowTask = () => {
     setSingleId(id._id);
   };
   const handleUpdateTask = async (e: any) => {
-    console.log(singleItem);
     e.preventDefault();
     await updateTask(singleItem);
     swal("Update successfully", "", "success");
@@ -76,15 +87,15 @@ const ShowTask = () => {
     });
   };
 
-  console.log(data);
   return (
     <div className="flex">
       <div className="w-[250px] border-orange-500 border-y-4 p-2 bg-white">
         <h2 className="mb-2  text-center font-bold">TO DO</h2>
         {data?.map((item, index) => {
-          const dateString = item?.date;
+          const dateString = item?.deadlineDate;
           const timeString = item?.time;
           const now = new Date().getTime();
+
           const futureDate = new Date(dateString + " " + timeString).getTime();
           const timeleft = futureDate - now;
           const days = Math.floor(timeleft / (1000 * 60 * 60 * 24));
@@ -106,19 +117,32 @@ const ShowTask = () => {
                       (Close Time: <b className="text-[15px]">{item?.time}</b>)
                     </p>
                     <p>
-                      (Close Date: <b className="text-[15px]">{item?.date}</b>)
+                      (Close Date: <b className="text-[15px]">{item?.deadlineDate}</b>)
                     </p>
                   </del>
                 ) : (
                   <>
-                    <li className="">{item?.task}</li>
+                  <div className="flex justify-between ">
+                  <li className="">{item?.task}</li> 
+                  {
+                    item.taskPriority !=='' && item.taskPriority=='high' ? (<FontAwesomeIcon icon={faGgCircle} className="text-red-500 text-[20px]"></FontAwesomeIcon>):''
+                  }
+                  {
+                    item.taskPriority !=='' && item.taskPriority=='low' ? (<FontAwesomeIcon icon={faGgCircle} className="text-green-500 text-[20px]"></FontAwesomeIcon>):''
+                  }
+                  {
+                    item.taskPriority !=='' && item.taskPriority=='medium' ? (<FontAwesomeIcon icon={faGgCircle} className="text-yellow-500 text-[20px]"></FontAwesomeIcon>):''
+                  }
+                  
+
+                  </div>
                     <p>
                       (Close Time: <b className="text-[15px]">{item?.time}</b>)
                     </p>
                     <p>
-                      (Close Date: <b className="text-[15px]">{item?.date}</b>)
+                      (Close Date: <b className="text-[15px]">{item?.deadlineDate}</b>)
                     </p>
-                    {hours <= 1 ? (
+                    { days<=2? (
                       <p className="text-red-500">
                         (
                         <b className="text-[15px]">
@@ -131,7 +155,6 @@ const ShowTask = () => {
                       <p>
                         (Remaining Time:
                         <b className="text-[15px]">
-                          {" "}
                           {days} days {hours} hours {minutes} minutes {seconds}{" "}
                           seconds
                         </b>
@@ -163,6 +186,8 @@ const ShowTask = () => {
                         openTask({
                           _id: item._id,
                           task: item.task,
+                          time:item.time,
+                          deadlineDate:item.deadlineDate
                         });
                         swal("Open task", "", "success");
                       }}
@@ -176,6 +201,8 @@ const ShowTask = () => {
                         closeTask({
                           _id: item._id,
                           task: item.task,
+                          time:item.time,
+                          deadlineDate:item.deadlineDate
                         });
                         swal("Close task", "", "success");
                       }}
@@ -204,6 +231,7 @@ const ShowTask = () => {
             handleUpdateTask={handleUpdateTask}
             singleItem={singleItem}
             setSingleItem={setSingleItem}
+            formattedDate={formattedDate}
           ></UpdateTakModal>
         ) : null}
       </div>

@@ -1,0 +1,136 @@
+import Select from "react-select";
+const UpdateTakModal = ({
+  setShowModal,
+  handleUpdateTask,
+  singleItem,
+  setSingleItem,
+  formattedDate
+}) => {
+  const options = [
+    { value: "low", label: "Low" },
+    { value: "medium", label: "Medium" },
+    { value: "high", label: "High" },
+  ];
+  return (
+    <>
+      <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
+        <div className="relative w-[700px] my-6 mx-auto max-w-3xl">
+          {/*content*/}
+          <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+            {/*header*/}
+            <div className=" ">
+              <span
+                className="text-red-800 rounded-full p-1 text-3xl"
+                onClick={() => setShowModal(false)}
+              >
+                ×
+              </span>
+            </div>
+
+            <div className="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
+              <h3 className="text-3xl font-semibold">Update Task</h3>
+              <button
+                className="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
+                onClick={() => setShowModal(false)}
+              >
+                <span className="bg-transparent text-black opacity-5 h-6 w-6 text-2xl block outline-none focus:outline-none">
+                  ×
+                </span>
+              </button>
+            </div>
+            {/*body*/}
+            <div className="relative p-10 flex-auto">
+              <form action="" onSubmit={handleUpdateTask}>
+                <div className="flex justify-center">
+                  <input
+                    type="text"
+                    className="border"
+                    name="name"
+                    value={singleItem?.task}
+                    onChange={(e) => {
+                      setSingleItem({
+                        _id: singleItem._id,
+                        task: e.target.value,
+                        status: singleItem.status,
+                        time: singleItem.time,
+                        deadlineDate: singleItem.deadlineDate,
+                        startTime:singleItem.startTime
+                      });
+                    }}
+                    style={{
+                      border: "1px solid green",
+                      padding: "5px",
+                      width: "100%",
+                    }}
+                  />
+                  <input
+                    type="time"
+                    className="border"
+                    name="time"
+                    value={singleItem?.time}
+                    onChange={(e) => {
+                      setSingleItem({
+                        _id: singleItem._id,
+                        task: singleItem.task,
+                        status: singleItem.status,
+                        time: e.target.value,
+                        deadlineDate: singleItem.deadlineDate,
+                        startTime:singleItem.startTime
+                      });
+                    }}
+                    style={{
+                      border: "1px solid green",
+                      padding: "5px",
+                      width: "100%",
+                    }}
+                  />
+                  <input
+                    type="date"
+                    className="border"
+                    name="date"
+                    value={singleItem?.deadlineDate}
+                    onChange={(e) => {
+                      setSingleItem({
+                        _id: singleItem._id,
+                        task: singleItem.task,
+                        status: singleItem.status,
+                        time: singleItem.time,
+                        deadlineDate: e.target.value,
+                        startTime:formattedDate
+                      });
+                    }}
+                    style={{
+                      border: "1px solid green",
+                      padding: "5px",
+                      width: "100%",
+                    }}
+                  />
+                  <Select
+                          options={options}
+                          className="rounded-2xl"
+                          onChange={(e) => 
+                            setSingleItem({
+                              _id: singleItem._id,
+                              task: singleItem.task,
+                              status: singleItem.status,
+                              time: singleItem.time,
+                              deadlineDate: singleItem.deadlineDate,
+                              startTime:formattedDate,
+                              taskPriority:e.value
+                            })}
+                        />
+                  <button className="btn bg-indigo-600 text-white ml-2 p-2">
+                    Update
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+    </>
+  );
+};
+
+export default UpdateTakModal;
