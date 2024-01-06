@@ -1,66 +1,26 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { IAllTask } from "../../../types/taskType";
-import { ISingleTask } from "../../../types/singleTask";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axios from "axios";
 
-const initialState: IAllTask = {
-  flower: {
-    "1": {
-      name: "To do",
-      listData: [
-        { id: "1", name: "Orchid" },
-        { id: "2", name: "Carnation" },
-        { id: "3", name: "Lily" },
-        { id: "4", name: "Tulip" },
-      ],
-    },
-    // "2": {
-    //   name: "In Progress",
-    //   listData: [],
-    // },
-  },
-};
-export const MOVE_FLOWER = "MOVE_FLOWER";
-
-export interface IMoveTask {
-  sourceListId: string;
-  destinationListId: string;
-  flowerId: string;
-}
-
+export const fetchTaskData = createAsyncThunk("getData", async () => {
+  try {
+    const response = await axios.get(`http://localhost:5000/task`);
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    throw error;
+  }
+});
 const treeviewSlice = createSlice({
   name: "treeview",
-  initialState,
-  reducers: {
-    // setTask: (state, action) => {
-    //   console.log(action.payload);
-    //   state.flower = action.payload;
-    // },
-    moveTask: (state = initialState, action: PayloadAction<IMoveTask>) => {
-      console.log(state);
-      console.log(state.flower);
-      const { sourceListId, destinationListId, flowerId } = action.payload;
-      console.log(sourceListId, destinationListId);
-      const flowerToMove = state[sourceListId].listData.find(
-        (flower: ISingleTask) => flower.id === flowerId
-      );
-      const updatedSourceList = state[sourceListId].listData.filter(
-        (flower: ISingleTask) => flower.id !== flowerId
-      );
-      const updatedDestinationList = [
-        ...state[destinationListId].listData,
-        flowerToMove,
-      ];
-
-      return {
-        ...state,
-        [sourceListId]: { ...state[sourceListId], listData: updatedSourceList },
-        [destinationListId]: {
-          ...state[destinationListId],
-          listData: updatedDestinationList,
-        },
-      };
-    },
+  initialState: { data: [] },
+  reducers: {},
+  extraReducers(builder) {
+    builder.addCase(fetchTaskData.fulfilled, (state, action) => {
+      console.log(action.payload);
+      state.data = action.payload;
+    });
   },
 });
-export const { moveTask } = treeviewSlice.actions;
+
 export default treeviewSlice.reducer;

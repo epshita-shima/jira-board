@@ -1,30 +1,47 @@
 import { useEffect, useState } from "react";
-import {
-  useGetTasksQuery,
-  useUpdateTaskMutation,
-} from "../../redux/api/apiSlice";
+import { useUpdateTaskMutation } from "../../redux/api/apiSlice";
 import swal from "sweetalert";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { useSelector } from "react-redux";
+import {
+  fetchTaskById,
+  fetchTasks,
+} from "../../redux/features/boards/boardSlice";
+import { useDispatch } from "react-redux";
 
 const NotificationModal = ({ setNotificationModal, countNotification }) => {
-  const { data } = useGetTasksQuery(undefined);
   const [updateEstimateDate, setUpdateEstimateDate] = useState(false);
   const [singleId, setSingleId] = useState([]);
   const [singleItem, setSingleItem] = useState([]);
   const [updateTask] = useUpdateTaskMutation();
-  const [startDate, setStartDate] = useState(new Date());
+  const [finishDate, setFinishDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(null);
+  const [expanDate, setExpanDate] = useState("");
+  const [data, setData] = useState([]);
+  const dispatch = useDispatch();
+  console.log(countNotification);
+  console.log(endDate);
 
-  const date_data = startDate;
-  const newDate = new Date(date_data);
-  const year = newDate.toLocaleString("default", {
-    year: "numeric",
-  });
-  const month = newDate.toLocaleString("default", {
-    month: "2-digit",
-  });
-  const day = newDate.toLocaleString("default", {
-    day: "2-digit",
-  });
-  const formattedDate = year + "-" + month + "-" + day;
+  const tasks = useSelector((state) => state.boardview);
+  console.log(countNotification);
+  useEffect(() => {
+    const mergeResult = [].concat(
+      tasks.requested.items,
+      tasks.toDo.items,
+      tasks.inProgress.items,
+      tasks.done.items
+    );
+    setData(mergeResult);
+  }, [
+    tasks.requested.items,
+    tasks.toDo.items,
+    tasks.inProgress.items,
+    tasks.done.items,
+  ]);
+  useEffect(() => {
+    dispatch(fetchTasks());
+  }, [dispatch]);
 
   const handleGetSingleData = (id: { _id: React.SetStateAction<never[]> }) => {
     setSingleId(id._id);
@@ -37,24 +54,46 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
   }, [countNotification.length, setNotificationModal]);
 
   const handleUpdateTaskDate = async (e) => {
-   
     e.preventDefault();
     const comments = e.target.msg.value;
-    const expandDate = e.target.expandDate.value;
+    // const expandDate = e.target.expandDate.value;
+
     const updateData = {
       _id: singleItem?._id,
       task: singleItem?.task,
       status: singleItem?.status,
       time: singleItem?.time,
-      deadlineDate: expandDate,
-      startTime: formattedDate,
+      deadlineDate: finishDate.toLocaleDateString("en-CA"),
+      startTime:singleItem?.startTime,
       remarks: comments,
+      taskPriority: singleItem.taskPriority,
     };
-    
-    await updateTask(updateData);
+    console.log(updateData);
+    await dispatch(fetchTaskById(updateData));
     swal("Not approve yet.", "Admin will check and let you know..", "success");
     setUpdateEstimateDate(false);
   };
+
+  useEffect(() => {
+    console.log(singleItem?.deadlineDate);
+    const newDates = new Date(singleItem?.deadlineDate);
+    newDates.setDate(newDates.getDate() + 10);
+    
+    console.log(newDates);
+    const date_data1 = newDates;
+    const newDate1 = new Date(date_data1);
+    const year1 = newDate1.toLocaleString("default", {
+      year: "numeric",
+    });
+    const month1 = newDate1.toLocaleString("default", {
+      month: "2-digit",
+    });
+    const day1 = newDate1.toLocaleString("default", {
+      day: "2-digit",
+    });
+    const formattedDates = year1 + "-" + month1 + "-" + day1;
+    setExpanDate(formattedDates);
+  }, [singleItem?.deadlineDate, finishDate]);
 
   return (
     <>
@@ -64,25 +103,28 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
           <div className="border-0 rounded-lg   relative flex flex-col w-full bg-emerald-700 shadow-2xl outline-none focus:outline-none">
             {/*header*/}
             <div className="flex items-start justify-between p-5 border-b border-solid border-gray-500 rounded-t">
-            <h3 className="text-xl font-semibold text-white">
-              Task Notification
-            </h3>
-            <button
-              className="p-1 ml-auto bg-transparent border-0 text-black  float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-              onClick={() => setNotificationModal(false)}
-            >
-              <span className="bg-transparent text-red-500  h-6 w-6 text-[30px] block outline-none focus:outline-none">
-                ×
-              </span>
-            </button>
-          </div> 
+              <h3 className="text-xl font-semibold text-white">
+                Task Notification
+              </h3>
+              <button
+                className="p-1 ml-auto bg-transparent border-0 text-black  float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
+                onClick={() => setNotificationModal(false)}
+              >
+                <span className="bg-transparent text-red-500  h-6 w-6 text-[30px] block outline-none focus:outline-none">
+                  ×
+                </span>
+              </button>
+            </div>
             {/*body*/}
 
             <div className="relative p-6 flex-auto justify-between items-center  my-4 w-[90%] mx-auto rounded-xl">
               {countNotification?.map((item, index) => {
+                console.log(item);
+
                 const findMatchingIndices = (data, countNotification) => {
                   const matchingIndices = [];
                   data.forEach((element, index) => {
+                    console.log();
                     if (countNotification.includes(element)) {
                       matchingIndices.push(index + 1);
                     }
@@ -94,18 +136,20 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
                   data,
                   countNotification
                 );
-
+                console.log(matchingIndices);
                 return (
                   <div className="flex justify-between  py-1  mt-2 items-center  text-white border-b-2">
                     <div className="w-[70%]">
                       <mark className="px-1">
-                        Task No: {matchingIndices[index]},
-                        <mark>{item.task}</mark>
-                      </mark>{" "}
+                        Task No: {matchingIndices[index]},that is in
+                        <span className="text-red-700">{item.status}</span>
+                        state
+                        <mark> {item.task}</mark>
+                      </mark>
                       time will expired within 2 days
                     </div>
                     <button
-                      className="btn  px-2 py-1 text-black font-bold"
+                      className=" px-2 py-1 text-black font-bold bg-gray-100 rounded"
                       onClick={() => {
                         handleGetSingleData(item);
                         setUpdateEstimateDate(true);
@@ -129,7 +173,7 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
                     <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
                       {/*header*/}
                       <div className="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
-                        <h3 className="text-3xl font-semibold">
+                        <h3 className="text-[20px] font-semibold text-black">
                           Aprroximate Completion Date
                         </h3>
                         <button
@@ -145,22 +189,22 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
                       <div className="relative px-10 py-6 flex-auto">
                         <form action="" onSubmit={handleUpdateTaskDate}>
                           <label
-                            for="message"
-                            class="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
+                            htmlFor="message"
+                            className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
                           >
                             Your Comments
                           </label>
                           <textarea
                             id="message"
                             rows="2"
-                            className="block p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 outline-none   dark:border-gray-600 dark:placeholder-gray-400 dark:black mb-2 "
+                            className="block p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 outline-none   dark:border-gray-600 dark:placeholder-gray-400 dark:black mb-2 bg-white"
                             placeholder="Write your thoughts here..."
                             required
                             name="msg"
                           ></textarea>
                           <label
-                            for="message"
-                            class="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
+                            htmlFor="message"
+                            className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
                           >
                             Task Closing Date
                           </label>
@@ -172,15 +216,15 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
                             className="block p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 outline-none  dark:bg-gray-400 dark:placeholder-gray-400 dark:text-black  "
                           />
                           <label
-                            for="message"
-                            class="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black mt-2"
+                            htmlFor="message"
+                            className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black mt-2"
                           >
-                            Aprroximate Completion Date{" "}
-                            <mark className="bg-red-300">
-                              (You can't expand this task more 10 days )
+                            Aprroximate Completion Date 
+                             <mark className="bg-red-300">
+                               ( You can't expand this task more 10 days )
                             </mark>
                           </label>
-                          <input
+                          {/* <input
                             type="date"
                             required
                             name="expandDate"
@@ -210,8 +254,24 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
                               }
                             }}
                             className="block p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 outline-none  dark:border-gray-600 dark:placeholder-gray-400 dark:text-black  "
-                          />
-                          <button className="btn bg-indigo-600 text-white mt-2 p-2 w-[30%]">
+                          /> */}
+                          <div className=" block p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 outline-none  dark:border-gray-600 dark:placeholder-gray-400 dark:text-black ">
+                            <DatePicker
+                              selected={finishDate}
+                              onChange={(finishDate) => {
+                                setFinishDate(finishDate);
+                                // console.log(dates)
+                                // const[start,end]=dates
+                                // console.log(start,end)
+                              }}
+                              className="outline-none bg-white"
+                              minDate={new Date(singleItem?.deadlineDate)}
+                              maxDate={new Date(expanDate)}
+                              startDate={finishDate}
+                              endDate={endDate}
+                            />
+                          </div>
+                          <button className=" bg-indigo-600 text-white mt-2 p-2 w-[30%] rounded mx-auto">
                             Update
                           </button>
                         </form>

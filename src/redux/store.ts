@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
-import treeviewReducer from "./features/treeViews/treeviewSlice";
+import boardviewReducer from "./features/boards/boardSlice";
 import { api } from "./api/apiSlice";
 const store = configureStore({
   reducer: {
-    treeview: treeviewReducer,
+    boardview: boardviewReducer,
     [api.reducerPath]: api.reducer,
   },
   middleware: (getDefaultMiddleware) =>

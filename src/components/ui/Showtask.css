@@ -1,0 +1,36 @@
+
+.menu-btn {
+   color: black;
+   font-size: 20px;
+}
+title{
+    background: green;
+}
+.dropdown-menu {
+   position: relative;
+   display: inline-block;
+}
+/* .dropdown-menu  >*:first-child{
+ background:red;
+} */
+
+.menu-content {
+   display: none;
+   position: absolute;
+   background: gray;
+   min-width: 140px;
+   z-index: 1;
+}
+
+.links {
+   color: black;
+   padding: 6px 8px;
+   text-decoration: none;
+   display: block;
+   font-size: 14px;
+   border-bottom: 1px solid rgb(208, 204, 204);
+}
+
+/* .dropdown-menu:hover .menu-btn {
+   background-color: #3e8e41;
+} */
