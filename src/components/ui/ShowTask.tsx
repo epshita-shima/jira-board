@@ -33,16 +33,17 @@ const ShowTask = ({
 
   const tasks = useSelector((state) => state.boardview);
   const columns = tasks;
+  console.log(columns)
   useEffect(() => {
     const mergeResult = [].concat(
-      tasks.requested.items,
+      tasks.unitTest.items,
       tasks.toDo.items,
       tasks.inProgress.items,
       tasks.done.items
     );
     setData(mergeResult);
   }, [
-    tasks.requested.items,
+    tasks.unitTest.items,
     tasks.toDo.items,
     tasks.inProgress.items,
     tasks.done.items,
@@ -81,7 +82,7 @@ const ShowTask = ({
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center" }}>
+    <div style={{ display: "flex", justifyContent: "center" ,overflowX:'auto'}}>
       <DragDropContext
         onDragStart={(result) => onDragStart(result)}
         onDragUpdate={(result) => onDragUpdate(result)}
@@ -90,13 +91,12 @@ const ShowTask = ({
         {Object.entries(columns)?.map(([columnId]) => {
           const column = columns[columnId];
           return (
-            // <div className="flex">
+            // <div c lassName="flex">
             <div
-              className="w-[290px] border-gray-300  p-2 bg-[#F8F9FA] ml-4 mt-2"
+              className="w-[250px] border-gray-300  p-2 bg-[#F8F9FA] ml-4 mt-2"
               style={{
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
+                justifyContent:'space-between',
                 height: "500px",
                 border: "1px solid #d1d5db",
               }}
@@ -113,7 +113,7 @@ const ShowTask = ({
                     </div>
                     <ul
                       tabindex="0"
-                      className="dropdown-content z-[1] left-[-115px] menu p-2 shadow text-black bg-gray-100 rounded-box w-36"
+                      className="dropdown-content z-[1] left-[-115px] menu p-2 shadow text-black bg-gray-100 rounded-box "
                     >
                       <li
                         className="border-b"
@@ -217,14 +217,13 @@ const ShowTask = ({
                         {...provided.droppableProps}
                         ref={provided.innerRef}
                         style={{
-                          // overflowY:'auto',
                           background: snapshot.isDraggingOver
                             ? "lightblue"
                             : "#F8F9FA",
                           padding: 4,
                           height: "310px",
                         }}
-                        className="scrollbar-thin scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thumb-slate-500 scrollbar-track-slate-300  overflow-y-scroll"
+                        className="scrollbar-thin scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thumb-slate-500 scrollbar-track-slate-300  overflow-y-scroll w-full"
                       >
                         {column?.items?.map((item, index) => {
                           const dateString = item?.deadlineDate;

@@ -72,15 +72,8 @@ export const fetchUpdateTasks = createAsyncThunk("update", async (data) => {
 const boardSlice = createSlice({
   name: "board",
   initialState: {
-    requested: {
-      name: "Requested",
-      items: [],
-      isLoading: false,
-      isError: false,
-      error: null,
-    },
     toDo: {
-      name: "To do",
+      name: "ToDo",
       items: [],
       isLoading: false,
       isError: false,
@@ -93,8 +86,22 @@ const boardSlice = createSlice({
       isError: false,
       error: null,
     },
+    unitTest: {
+      name: "Unit Test",
+      items: [],
+      isLoading: false,
+      isError: false,
+      error: null,
+    },
+    qualityAssurance: {
+      name: "Quality Assurance",
+      items: [],
+      isLoading: false,
+      isError: false,
+      error: null,
+    },
     done: {
-      name: "Done",
+      name: "Completed",
       items: [],
       isLoading: false,
       isError: false,
@@ -130,60 +137,59 @@ const boardSlice = createSlice({
   extraReducers(builder) {
     builder
       .addCase(fetchTasks.pending, (state) => {
-        state.requested.isLoading = true;
-        state.requested.isError = false;
-        state.requested.error = null;
         state.toDo.isLoading = true;
         state.toDo.isError = false;
         state.toDo.error = null;
       })
       .addCase(fetchTasks.fulfilled, (state, action) => {
-        // console.log("Fetched tasks:", action.payload, state.requested.items);
         const allData = action.payload;
-        console.log(action.payload);
-        const dataCollection = allData?.filter((ele) => ele.status == "done");
-        const dataCollectionOthers = allData?.filter(
-          (ele) =>
-            ele.status == null || ele.status == "" || ele.status == "requested"
-        );
         const dataCollectionTodo = allData?.filter(
           (ele) => ele.status == "toDo"
         );
         const dataCollectionInProggess = allData?.filter(
           (ele) => ele.status == "inProgress"
         );
-        state.requested.items = dataCollectionOthers;
-        state.done.items = dataCollection;
+        const dataCollectionUnitTest = allData?.filter(
+          (ele) =>
+            ele.status == null || ele.status == "" || ele.status == "unitTest"
+        );
+        const dataCollectionQA = allData?.filter(
+          (ele) =>
+            ele.status == null ||
+            ele.status == "" ||
+            ele.status == "qualityAssurance"
+        );
+
+        const dataCollection = allData?.filter((ele) => ele.status == "done");
         state.toDo.items = dataCollectionTodo;
         state.inProgress.items = dataCollectionInProggess;
-        state.requested.isLoading = false;
+        state.unitTest.items = dataCollectionUnitTest;
+        state.qualityAssurance.items = dataCollectionQA;
+        state.done.items = dataCollection;
         state.toDo.isLoading = false;
+        state.unitTest.isLoading = false;
       })
       .addCase(fetchTasks.rejected, (state, action) => {})
 
       .addCase(fetchTasksPost.fulfilled, (state, action) => {
-        state.requested.items.push(action.payload);
+        state.toDo.items.push(action.payload);
       })
       .addCase(fetchUpdateTasks.fulfilled, (state, action) => {})
       .addCase(fetchTaskById.pending, (state, action) => {
-        state.requested.isLoading = true;
-        state.requested.isError = false;
-        state.requested.error = null;
         state.toDo.isLoading = true;
         state.toDo.isError = false;
         state.toDo.error = null;
       })
       .addCase(fetchTaskById.fulfilled, (state, action) => {
-        console.log(action.payload);
         if (
           action.payload.status == null ||
           action.payload.status == "" ||
-          action.payload.status == "requested"
+          action.payload.status == "unitTest"
         ) {
-          state.requested.items = state.requested.items.map((item) =>
+          state.unitTest.items = state.unitTest.items.map((item) =>
             item._id === action.payload._id ? action.payload : item
           );
-          console.log(state.requested.items);
+          console.log(state.unitTest.items);
         }
         if (action.payload.status == "toDo") {
           state.toDo.items = state.toDo.items.map((item) =>
@@ -195,22 +201,28 @@ const boardSlice = createSlice({
             item._id === action.payload._id ? action.payload : item
           );
         }
+        if (action.payload.status == "qualityAssurance") {
+          state.qualityAssurance.items = state.qualityAssurance.items.map(
+            (item) => (item._id === action.payload._id ? action.payload : item)
+          );
+        }
         if (action.payload.status == "done") {
           state.done.items = state.done.items.map((item) =>
             item._id === action.payload._id ? action.payload : item
           );
         }
 
-        state.requested.isLoading = false;
+        state.unitTest.isLoading = false;
         state.toDo.isLoading = false;
         state.inProgress.isLoading = false;
+        state.qualityAssurance.isLoading = false;
         state.done.isLoading = false;
       })
 
       .addCase(fetchTaskDelete.pending, (state) => {
-        state.requested.isLoading = true;
-        state.requested.isError = false;
-        state.requested.error = null;
+        state.unitTest.isLoading = true;
+        state.unitTest.isError = false;
+        state.unitTest.error = null;
         state.toDo.isLoading = true;
         state.toDo.isError = false;
         state.toDo.error = null;
@@ -221,26 +233,30 @@ const boardSlice = createSlice({
 
         const id = action.meta.arg;
         if (id) {
-          state.requested.items = state.requested.items.filter(
+          state.toDo.items = state.toDo.items.filter((ele) => ele._id !== id);
+          console.log(state.toDo.items);
+
+          state.qualityAssurance.items = state.qualityAssurance.items.filter(
             (ele) => ele._id !== id
           );
-          console.log(state.requested.items);
-
-          state.toDo.items = state.toDo.items.filter((ele) => ele._id !== id);
           state.inProgress.items = state.inProgress.items.filter(
+            (ele) => ele._id !== id
+          );
+          state.unitTest.items = state.unitTest.items.filter(
             (ele) => ele._id !== id
           );
 
           state.done.items = state.done.items.filter((ele) => ele._id !== id);
         }
-        state.requested.isLoading = false;
         state.toDo.isLoading = false;
+        state.unitTest.isLoading = false;
         state.inProgress.isLoading = false;
+        state.qualityAssurance.isLoading = false;
         state.done.isLoading = false;
       })
       .addCase(fetchTaskDelete.rejected, (state) => {
-        state.requested.isLoading = false;
-        state.requested.isError = true;
+        state.toDo.isLoading = false;
+        state.toDo.isError = true;
       });
   },
 });

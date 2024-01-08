@@ -50,14 +50,14 @@ const AddTask = ({
 
   useEffect(() => {
     const mergeResult = [].concat(
-      tasks.requested.items,
+      tasks.unitTest.items,
       tasks.toDo.items,
       tasks.inProgress.items,
       tasks.done.items
     );
     setData(mergeResult);
   }, [
-    tasks.requested.items,
+    tasks.unitTest.items,
     tasks.toDo.items,
     tasks.inProgress.items,
     tasks.done.items,

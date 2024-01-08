@@ -1,4 +1,3 @@
-// import BoardsDesign from "./components/ui/BoardsDesign"
 import { useState } from "react";
 import ShowTask from "./components/ui/ShowTask"
 import Footer from "./page/Footer"
