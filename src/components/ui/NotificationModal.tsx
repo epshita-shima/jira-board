@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useUpdateTaskMutation } from "../../redux/api/apiSlice";
 import swal from "sweetalert";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -14,7 +13,6 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
   const [updateEstimateDate, setUpdateEstimateDate] = useState(false);
   const [singleId, setSingleId] = useState([]);
   const [singleItem, setSingleItem] = useState([]);
-  const [updateTask] = useUpdateTaskMutation();
   const [finishDate, setFinishDate] = useState(new Date());
   const [endDate, setEndDate] = useState(null);
   const [expanDate, setExpanDate] = useState("");
@@ -27,17 +25,19 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
   console.log(countNotification);
   useEffect(() => {
     const mergeResult = [].concat(
-      tasks.requested.items,
       tasks.toDo.items,
       tasks.inProgress.items,
+      tasks.unitTest.items,
+      tasks.qualityAssurance.items,
       tasks.done.items
     );
     setData(mergeResult);
   }, [
-    tasks.requested.items,
     tasks.toDo.items,
     tasks.inProgress.items,
-    tasks.done.items,
+    tasks.unitTest.items,
+    tasks.qualityAssurance.items,
+    tasks.done.items
   ]);
   useEffect(() => {
     dispatch(fetchTasks());
@@ -66,6 +66,7 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
       deadlineDate: finishDate.toLocaleDateString("en-CA"),
       startTime:singleItem?.startTime,
       remarks: comments,
+      pinTask:singleItem.pinTask,
       taskPriority: singleItem.taskPriority,
     };
     console.log(updateData);
@@ -98,7 +99,7 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
   return (
     <>
       <div className=" justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
-        <div className="relative w-[700px] my-6 mx-auto max-w-3xl ">
+        <div className="relative sm:w-[60%] md:w-[60%] lg:w-[60%] xl:w-[70%] 2xl:w-[70%] my-6 mx-auto ">
           {/*content*/}
           <div className="border-0 rounded-lg   relative flex flex-col w-full bg-emerald-700 shadow-2xl outline-none focus:outline-none">
             {/*header*/}
@@ -169,9 +170,7 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
                   className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none"
                 >
                   <div className="relative w-[700px] my-6 mx-auto max-w-3xl">
-                    {/*content*/}
                     <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-                      {/*header*/}
                       <div className="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
                         <h3 className="text-[20px] font-semibold text-black">
                           Aprroximate Completion Date
@@ -185,7 +184,6 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
                           </span>
                         </button>
                       </div>
-                      {/*body*/}
                       <div className="relative px-10 py-6 flex-auto">
                         <form action="" onSubmit={handleUpdateTaskDate}>
                           <label
@@ -224,45 +222,12 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
                                ( You can't expand this task more 10 days )
                             </mark>
                           </label>
-                          {/* <input
-                            type="date"
-                            required
-                            name="expandDate"
-                            onChange={(e) => {
-                              const now = new Date(
-                                singleItem?.deadlineDate
-                              ).getDate();
-                              const futureDate = new Date(
-                                e.target.value
-                              ).getDate();
-                              const dayleft = futureDate - now;
-
-                              if (singleItem?.deadlineDate > e.target.value) {
-                                swal(
-                                  "Not POssible",
-                                  "Please select valid date",
-                                  "warning"
-                                );
-                                e.target.value = "";
-                              } else if (dayleft > 10) {
-                                swal(
-                                  "Not POssible",
-                                  "You can expand date maximum 10 days",
-                                  "warning"
-                                );
-                                e.target.value = "";
-                              }
-                            }}
-                            className="block p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 outline-none  dark:border-gray-600 dark:placeholder-gray-400 dark:text-black  "
-                          /> */}
+                         
                           <div className=" block p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 outline-none  dark:border-gray-600 dark:placeholder-gray-400 dark:text-black ">
                             <DatePicker
                               selected={finishDate}
                               onChange={(finishDate) => {
                                 setFinishDate(finishDate);
-                                // console.log(dates)
-                                // const[start,end]=dates
-                                // console.log(start,end)
                               }}
                               className="outline-none bg-white"
                               minDate={new Date(singleItem?.deadlineDate)}
@@ -271,7 +236,7 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
                               endDate={endDate}
                             />
                           </div>
-                          <button className=" bg-indigo-600 text-white mt-2 p-2 w-[30%] rounded mx-auto">
+                          <button className=" bg-[#d7888a] text-black mt-2 p-2 w-[30%] rounded mx-auto">
                             Update
                           </button>
                         </form>

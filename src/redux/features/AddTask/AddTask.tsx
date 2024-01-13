@@ -18,7 +18,6 @@ const AddTask = ({
   showModal,
   setShowModal,
   showUpdate,
-  setShowUpdate,
   showFormData,
   setShowFormData,
 }) => {
@@ -32,7 +31,7 @@ const AddTask = ({
   const [singleUpdateData, setSingleUpdateData] = useState([]);
 
   const dispatch = useDispatch();
-  console.log(showUpdate);
+
 
   const date_data = startDate;
   const newDate = new Date(date_data);
@@ -66,7 +65,7 @@ const AddTask = ({
   useEffect(() => {
     dispatch(fetchTasks());
   }, [dispatch]);
-console.log(showUpdate)
+
   useEffect(() => {
     const tempData = [];
     data?.forEach((element) => {
@@ -74,7 +73,6 @@ console.log(showUpdate)
       const now = new Date().getDate();
       const futureDate = new Date(deadlineDateString).getDate();
       const dayleft = futureDate - now;
-      console.log(dayleft);
       if (dayleft <= 2 && dayleft >= 0) {
         tempData.push(element);
       }
@@ -88,7 +86,6 @@ console.log(showUpdate)
         setCountNotification(countNotification + 1);
       }
     });
-    console.log(tempData);
     setCountNotification(tempData);
   }, [data, setCountNotification]);
 
@@ -110,6 +107,7 @@ console.log(showUpdate)
         deadlineDate: date,
         taskPriority: priorityValue,
         status: "",
+        pinTask:"",
         remarks:""
       };
       if (
@@ -223,11 +221,11 @@ console.log(showUpdate)
         {showModal ? (
           <>
             <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
-              <div className="relative w-[550px] my-6 mx-auto max-w-3xl">
+              <div className="relative sm:w-[60%] md:w-[60%] lg:w-[60%] xl:w-[70%] 2xl:w-[70%]  my-6 mx-auto">
                 {/*content*/}
                 <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
                   {/*header*/}
-                  <div className="flex  justify-between items-center p-5 border-b border-solid border-blueGray-200 rounded">
+                  <div className="flex  justify-between items-center p-5 border-b border-solid border-blueGray-200 rounded ">
                     <h3 className="text-xl font-semibold text-black">
                       {showUpdate ? "Update Task Details" : "Add Task Details"}
                     </h3>
@@ -244,6 +242,7 @@ console.log(showUpdate)
                           taskPriority: "",
                           time: "",
                           task: "",
+                          pinTask:"",
                           status: "",
                         });
                       }}
@@ -255,8 +254,9 @@ console.log(showUpdate)
                   </div>
                   {/*body*/}
 
-                  <div className="relative px-10 py-6 flex-auto">
-                    {showUpdate ? (
+                  <div className="relative px-10 py-6 flex-auto ">
+                   <div className="shadow-2xl p-4 rounded-md">
+                   {showUpdate ? (
                       <>
                         <div className="mb-2">
                           <label
@@ -283,7 +283,38 @@ console.log(showUpdate)
                     ) : (
                       ""
                     )}
-                    <div>
+                     <div>
+                      <label
+                        htmlFor="message"
+                        className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
+                      >
+                        Task Name
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        disabled={showFormData}
+                        value={showUpdate ? singleUpdateData.task : null}
+                        placeholder="Enter text"
+                        className={`block p-2 w-full text-sm  text-gray-900 rounded-lg border border-gray-300 outline-none dark:placeholder-gray dark:text-black ${showFormData ? 'bg-gray-100' :' bg-white'}`}
+                        onChange={(e) => {
+                          showUpdate
+                            ? setSingleUpdateData({
+                                _id: singleUpdateData._id,
+                                deadlineDate: singleUpdateData.deadlineDate,
+                                remarks: singleUpdateData.remarks,
+                                startTime: singleUpdateData.startTime,
+                                taskPriority: singleUpdateData.taskPriority,
+                                time: singleUpdateData.time,
+                                task: e.target.value,
+                                pinTask:singleUpdateData.pinTask,
+                                status: singleUpdateData.status,
+                              })
+                            : e.target.value;
+                        }}
+                      />
+                    </div>
+                    <div  className="mt-2">
                       <label
                         htmlFor="message"
                         className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
@@ -311,42 +342,14 @@ console.log(showUpdate)
                                 taskPriority: e.value,
                                 time: singleUpdateData.time,
                                 task: singleUpdateData.task,
+                                pinTask:singleUpdateData.pinTask,
                                 status: singleUpdateData.status,
                               })
                             : setPriorityValue(e.value)
                         }
                       />
                     </div>
-                    <div className="mt-2">
-                      <label
-                        htmlFor="message"
-                        className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
-                      >
-                        Task Name
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        disabled={showFormData}
-                        value={showUpdate ? singleUpdateData.task : null}
-                        placeholder="Enter text"
-                        className={`block p-2 w-full text-sm  text-gray-900 rounded-lg border border-gray-300 outline-none dark:placeholder-gray dark:text-black ${showFormData ? 'bg-gray-100' :' bg-white'}`}
-                        onChange={(e) => {
-                          showUpdate
-                            ? setSingleUpdateData({
-                                _id: singleUpdateData._id,
-                                deadlineDate: singleUpdateData.deadlineDate,
-                                remarks: singleUpdateData.remarks,
-                                startTime: singleUpdateData.startTime,
-                                taskPriority: singleUpdateData.taskPriority,
-                                time: singleUpdateData.time,
-                                task: e.target.value,
-                                status: singleUpdateData.status,
-                              })
-                            : e.target.value;
-                        }}
-                      />
-                    </div>
+                   
                     <div className="mt-2">
                       <label
                         htmlFor="message"
@@ -370,6 +373,7 @@ console.log(showUpdate)
                               taskPriority: singleUpdateData.taskPriority,
                               time: e.target.value,
                               task: singleUpdateData.task,
+                              pinTask:singleUpdateData.pinTask,
                               status: singleUpdateData.status,
                             })
                           : e.target.value;
@@ -409,6 +413,7 @@ console.log(showUpdate)
                                 taskPriority: singleUpdateData.taskPriority,
                                 time: singleUpdateData.time,
                                 task: singleUpdateData.task,
+                                pinTask:singleUpdateData.pinTask,
                                 status: singleUpdateData.status,
                               })
                             : e.target.value;
@@ -416,9 +421,10 @@ console.log(showUpdate)
                         }}
                       ></input>
                     </div>
-                    <button className=" bg-fuchsia-900 text-white text-[17px] mt-2 p-2 w-[50%] mx-auto rounded-md flex justify-center">
+                    <button className=" bg-[#d7888a] text-black text-[17px] mt-2 p-2 w-[50%] mx-auto rounded-md flex justify-center">
                       {showUpdate ? "Update" : "Save"}
                     </button>
+                   </div>
                   </div>
                 </div>
               </div>

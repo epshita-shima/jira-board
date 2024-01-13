@@ -4,7 +4,7 @@ const UpdateEstimateDateModal = ({setUpdateEstimateDate,singleItem,handleUpdateT
   return (
     <>
     <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
-      <div className="relative w-[700px] my-6 mx-auto max-w-3xl">
+      <div className="relative sm:w-[60%] md:w-[60%] lg:w-[60%] xl:w-[70%] 2xl:w-[70%] my-6 mx-auto ">
         {/*content*/}
         <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
           {/*header*/}

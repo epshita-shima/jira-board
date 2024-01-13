@@ -144,20 +144,17 @@ const boardSlice = createSlice({
       .addCase(fetchTasks.fulfilled, (state, action) => {
         const allData = action.payload;
         const dataCollectionTodo = allData?.filter(
-          (ele) => ele.status == "toDo"
+          (ele) =>
+            ele.status == "toDo" || ele.status == null || ele.status == ""
         );
         const dataCollectionInProggess = allData?.filter(
           (ele) => ele.status == "inProgress"
         );
         const dataCollectionUnitTest = allData?.filter(
-          (ele) =>
-            ele.status == null || ele.status == "" || ele.status == "unitTest"
+          (ele) => ele.status == "unitTest"
         );
         const dataCollectionQA = allData?.filter(
-          (ele) =>
-            ele.status == null ||
-            ele.status == "" ||
-            ele.status == "qualityAssurance"
+          (ele) => ele.status == "qualityAssurance"
         );
 
         const dataCollection = allData?.filter((ele) => ele.status == "done");

@@ -9,7 +9,7 @@ const [showUpdate,setShowUpdate]=useState(false)
 const [showFormData, setShowFormData] = useState(true);
 const [deleteTaskModal,setDeleteTaskModal]=useState(false)
   return (
-    <div className="mx-auto font-serif containers" >
+    <div className="mx-auto containers" >
      {/* <BoardsDesign></BoardsDesign> */}
      <AddTask showModal={showModal}
    setShowModal={setShowModal}
