@@ -20,7 +20,8 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
   const dispatch = useDispatch();
   console.log(countNotification);
   console.log(endDate);
-
+const notification=useSelector((state) => state.notificationView.data);
+console.log(notification)
   const tasks = useSelector((state) => state.boardview);
   console.log(countNotification);
   useEffect(() => {

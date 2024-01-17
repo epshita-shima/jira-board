@@ -6,10 +6,14 @@ import { useSelector } from "react-redux";
 import swal from "sweetalert";
 import { fetchTaskDelete } from "../../redux/features/boards/boardSlice";
 
-const UpdateTakModal = ({ setDeleteTaskModal }) => {
+const UpdateTakModal = ({ setDeleteTaskModal,columnName }) => {
   const [data, setData] = useState([]);
   const tasks = useSelector((state) => state.boardview);
   const dispatch = useDispatch();
+  console.log(tasks)
+  const stringWithoutSpaces = columnName.split(" ").join("");
+
+console.log(stringWithoutSpaces);
   useEffect(() => {
     const mergeResult = [].concat(
       tasks.toDo.items,
@@ -18,13 +22,16 @@ const UpdateTakModal = ({ setDeleteTaskModal }) => {
       tasks.qualityAssurance.items,
       tasks.done.items
     );
-    setData(mergeResult);
+    const filterMargeData=mergeResult.filter((data)=>(data.status.toLowerCase()==stringWithoutSpaces.toLowerCase()))
+    console.log(filterMargeData)
+    setData(filterMargeData);
   }, [
     tasks.toDo.items,
     tasks.inProgress.items,
     tasks.unitTest.items,
     tasks.qualityAssurance.items,
     tasks.done.items,
+    stringWithoutSpaces
   ]);
 
   const handleDeleteTask = async (id) => {
@@ -99,6 +106,9 @@ const UpdateTakModal = ({ setDeleteTaskModal }) => {
                             {index + 1}
                           </td>
                           <td className="border border-slate-600 ">
+                            {
+
+                            }
                             {element.task}
                           </td>
                           <td className="text-center  border border-slate-600 p-2">

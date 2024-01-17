@@ -4,6 +4,7 @@ import axios from "axios";
 export const fetchTasks = createAsyncThunk("getData", async () => {
   try {
     const response = await axios.get(`http://localhost:5000/task`);
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching tasks:", error);
@@ -53,7 +54,8 @@ export const fetchTaskDelete = createAsyncThunk("deleteData", async (id) => {
 
 //drag and drop
 export const fetchUpdateTasks = createAsyncThunk("update", async (data) => {
-  const response = await fetch(`http://localhost:5000/`, {
+  console.log(data);
+  const response = await fetch(`http://localhost:5000/project`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

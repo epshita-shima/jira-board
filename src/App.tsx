@@ -8,15 +8,22 @@ function App() {
 const [showUpdate,setShowUpdate]=useState(false)
 const [showFormData, setShowFormData] = useState(true);
 const [deleteTaskModal,setDeleteTaskModal]=useState(false)
+const [columnName,setColumnName]=useState('')
+const [countNotification, setCountNotification] = useState([]);
+const [notificationModal, setNotificationModal] = useState(false);
   return (
     <div className="mx-auto containers" >
      {/* <BoardsDesign></BoardsDesign> */}
      <AddTask showModal={showModal}
    setShowModal={setShowModal}
    showUpdate={showUpdate}
-   setShowUpdate={setShowUpdate}
    showFormData={showFormData} 
    setShowFormData={setShowFormData}
+   columnName={columnName}
+   countNotification={countNotification} 
+   setCountNotification={setCountNotification}
+   notificationModal={notificationModal} 
+   setNotificationModal={setNotificationModal}
    ></AddTask>
   
   {/* <Treeview></Treeview> */}
@@ -26,6 +33,12 @@ const [deleteTaskModal,setDeleteTaskModal]=useState(false)
    setShowFormData={setShowFormData}
    deleteTaskModal={deleteTaskModal}
    setDeleteTaskModal={setDeleteTaskModal}
+   columnName={columnName}
+   setColumnName={setColumnName}
+   countNotification={countNotification} 
+   setCountNotification={setCountNotification}
+   notificationModal={notificationModal} 
+   setNotificationModal={setNotificationModal}
    ></ShowTask>
   <Footer></Footer>
     </div>

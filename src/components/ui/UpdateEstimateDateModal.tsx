@@ -42,9 +42,16 @@ const UpdateEstimateDateModal = ({setUpdateEstimateDate,singleItem,handleUpdateT
                       _id: singleItem._id,
                       task: e.target.value,
                       status: singleItem.status,
+                      priviousStatus:singleItem.priviousStatus,
+                      markNotification:singleItem.markNotification,
                       time:singleItem.time,
                       deadlineDate:singleItem.deadlineDate,
-                      startDate:singleItem.startDate
+                      startDate:singleItem.startDate,
+                      pinTask: singleItem.pinTask,
+                      remarks: singleItem.remarks,
+                      taskPriority: singleItem.taskPriority,
+                      taskSubmissionDate: singleItem.taskSubmissionDate,
+                      taskCompletionDate: singleItem.taskCompletionDate,
                     });
                   }}
                   style={{
@@ -63,9 +70,16 @@ const UpdateEstimateDateModal = ({setUpdateEstimateDate,singleItem,handleUpdateT
                       _id: singleItem._id,
                       task: singleItem.task,
                       status: singleItem.status,
+                      priviousStatus:singleItem.priviousStatus,
+                      markNotification:singleItem.markNotification,
                       time:e.target.value,
                       deadlineDate:singleItem.deadlineDate,
-                      startDate:singleItem.startDate
+                      startDate:singleItem.startDate,
+                      pinTask: singleItem.pinTask,
+                      remarks: singleItem.remarks,
+                      taskPriority: singleItem.taskPriority,
+                      taskSubmissionDate: singleItem.taskSubmissionDate,
+                      taskCompletionDate: singleItem.taskCompletionDate,
                     });
                   }}
                   style={{
@@ -84,9 +98,16 @@ const UpdateEstimateDateModal = ({setUpdateEstimateDate,singleItem,handleUpdateT
                       _id: singleItem._id,
                       task: singleItem.task,
                       status: singleItem.status,
+                      priviousStatus:singleItem.priviousStatus,
+                      markNotification:singleItem.markNotification,
                       time:singleItem.time,
                       deadlineDate:e.target.value,
-                      startDate:singleItem.formattedDate
+                      startDate:singleItem.formattedDate,
+                      pinTask: singleItem.pinTask,
+                      remarks: singleItem.remarks,
+                      taskPriority: singleItem.taskPriority,
+                      taskSubmissionDate: singleItem.taskSubmissionDate,
+                      taskCompletionDate: singleItem.taskCompletionDate,
                     });
                   }}
                   style={{

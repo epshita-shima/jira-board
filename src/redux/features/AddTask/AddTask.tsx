@@ -20,18 +20,23 @@ const AddTask = ({
   showUpdate,
   showFormData,
   setShowFormData,
+  columnName,
+  countNotification, setCountNotification,
+  notificationModal, setNotificationModal
 }) => {
   // const [showModal, setShowModal] = useState(false);
   const [startDate, setStartDate] = useState(new Date());
-  const [countNotification, setCountNotification] = useState(0);
-  const [notificationModal, setNotificationModal] = useState(false);
   const [priorityValue, setPriorityValue] = useState();
   const [data, setData] = useState([]);
   const [dataOption, setDataOption] = useState([]);
   const [singleUpdateData, setSingleUpdateData] = useState([]);
-
+console.log(countNotification)
   const dispatch = useDispatch();
-
+  // const userInfo = useSelector((state) => state.userView.data);
+  const notification=useSelector((state) => state.notificationView.data);
+  console.log(notification)
+  const userLocalData = sessionStorage.getItem("userInfo");
+  console.log(userLocalData);
 
   const date_data = startDate;
   const newDate = new Date(date_data);
@@ -46,7 +51,7 @@ const AddTask = ({
   });
   const formattedDate = year + "-" + month + "-" + day;
   const tasks = useSelector((state) => state.boardview);
-
+  const stringWithoutSpaces = columnName.split(" ").join("");
   useEffect(() => {
     const mergeResult = [].concat(
       tasks.unitTest.items,
@@ -54,40 +59,45 @@ const AddTask = ({
       tasks.inProgress.items,
       tasks.done.items
     );
-    setData(mergeResult);
+    const filterMargeData = mergeResult.filter(
+      (data) => data.status.toLowerCase() == stringWithoutSpaces.toLowerCase()
+    );
+    console.log(filterMargeData);
+    setData(filterMargeData);
   }, [
     tasks.unitTest.items,
     tasks.toDo.items,
     tasks.inProgress.items,
     tasks.done.items,
+    stringWithoutSpaces,
   ]);
 
   useEffect(() => {
     dispatch(fetchTasks());
   }, [dispatch]);
 
-  useEffect(() => {
-    const tempData = [];
-    data?.forEach((element) => {
-      const deadlineDateString = element?.deadlineDate;
-      const now = new Date().getDate();
-      const futureDate = new Date(deadlineDateString).getDate();
-      const dayleft = futureDate - now;
-      if (dayleft <= 2 && dayleft >= 0) {
-        tempData.push(element);
-      }
-    });
-    data?.map((item) => {
-      const dateString = item?.deadlineDate;
-      const now = new Date().getDate();
-      const futureDate = new Date(dateString).getDate();
-      const dayleft = futureDate - now;
-      if (dayleft >= 2) {
-        setCountNotification(countNotification + 1);
-      }
-    });
-    setCountNotification(tempData);
-  }, [data, setCountNotification]);
+  // useEffect(() => {
+  //   const tempData = [];
+  //   data?.forEach((element) => {
+  //     const deadlineDateString = element?.deadlineDate;
+  //     const now = new Date().getDate();
+  //     const futureDate = new Date(deadlineDateString).getDate();
+  //     const dayleft = futureDate - now;
+  //     if (dayleft <= 2 && dayleft >= 0) {
+  //       tempData.push(element);
+  //     }
+  //   });
+  //   data?.map((item) => {
+  //     const dateString = item?.deadlineDate;
+  //     const now = new Date().getDate();
+  //     const futureDate = new Date(dateString).getDate();
+  //     const dayleft = futureDate - now;
+  //     if (dayleft >= 2) {
+  //       setCountNotification(countNotification + 1);
+  //     }
+  //   });
+  //   setCountNotification(tempData);
+  // }, [data, setCountNotification]);
 
   const handelAddTask = async (e: any) => {
     e.preventDefault();
@@ -95,11 +105,15 @@ const AddTask = ({
     const time = e.target.time.value;
     const date = e.target.date.value;
     console.log(priorityValue);
-    if(showUpdate==true){
+    if (showUpdate == true) {
       await dispatch(fetchTaskById(singleUpdateData));
-      swal("Update successfully", "", "success");
-    }
-    else{
+      swal({
+        title: "Good job!",
+        text: "Update successfully",
+        icon: "success",
+        button: "OK",
+      });
+    } else {
       const taskDetails = {
         task: task,
         startTime: formattedDate,
@@ -107,15 +121,24 @@ const AddTask = ({
         deadlineDate: date,
         taskPriority: priorityValue,
         status: "",
-        pinTask:"",
-        remarks:""
+        pinTask: "",
+        markNotification:'',
+        remarks: "",
+        taskSubmissionDate: "",
+        taskCompletionDate: "",
+        priviousStatus:""
       };
       if (
         taskDetails.task == "" ||
         taskDetails.time == "" ||
         taskDetails.deadlineDate == ""
       ) {
-        swal("Not Possible!", "Please write something..", "warning");
+        swal({
+          title: "Not Possible!",
+          text: "Please write something..",
+          icon: "warning",
+          button: "OK",
+        });
       } else {
         console.log(taskDetails);
         // await addtask(taskDetails);
@@ -123,12 +146,17 @@ const AddTask = ({
         e.target.name.value = "";
         e.target.time.value = "";
         e.target.date.value = "";
-        swal("Data added successfully", "success");
+        swal({
+          title: "Good job!",
+          text: "Data added successfully",
+          icon: "success",
+          button: "OK",
+        });
       }
     }
-   
+
     setShowModal(false);
-    setShowFormData(!showFormData)
+    setShowFormData(!showFormData);
   };
 
   const options = [
@@ -144,6 +172,7 @@ const AddTask = ({
     setDataOption(newArray);
   }, [data]);
   console.log(singleUpdateData);
+
   return (
     <>
       <div className="navbar bg-gray-100 text-black">
@@ -188,7 +217,7 @@ const AddTask = ({
               </li>
             </ul>
           </div> */}
-        </div> 
+        </div>
 
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1"></ul>
@@ -199,7 +228,7 @@ const AddTask = ({
               <FontAwesomeIcon icon={faBell}></FontAwesomeIcon>
             </button>
             <div className="counter absolute top-[10px] w-6 h-6 rounded-full bg-red-500 text-white text-center">
-              {countNotification.length}
+              {notification.length}
             </div>
           </div>
           <button
@@ -212,7 +241,7 @@ const AddTask = ({
               background: "#9ca3af",
             }}
           >
-            Login
+            {userLocalData}
           </button>
         </div>
       </div>
@@ -242,8 +271,12 @@ const AddTask = ({
                           taskPriority: "",
                           time: "",
                           task: "",
-                          pinTask:"",
+                          pinTask: "",
                           status: "",
+                          markNotification:'',
+                          taskSubmissionDate: "",
+                          taskCompletionDate: "",
+                          priviousStatus:""
                         });
                       }}
                     >
@@ -255,192 +288,227 @@ const AddTask = ({
                   {/*body*/}
 
                   <div className="relative px-10 py-6 flex-auto ">
-                   <div className="shadow-2xl p-4 rounded-md">
-                   {showUpdate ? (
-                      <>
-                        <div className="mb-2">
-                          <label
-                            htmlFor="message"
-                            className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
-                          >
-                            Select task for update
-                          </label>
-                          <Select
-                            options={dataOption}
-                            className="rounded-2xl text-black"
-                            onChange={(e) => {
-                              setPriorityValue(e.value);
-                              const filterSingleData = data.filter(
-                                (x) => x._id == e.value
-                              );
-                              // dispatch(fetchTaskById(filterSingleData))
-                              setSingleUpdateData(filterSingleData[0]);
-                              setShowFormData(false);
-                            }}
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      ""
-                    )}
-                     <div>
-                      <label
-                        htmlFor="message"
-                        className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
-                      >
-                        Task Name
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        disabled={showFormData}
-                        value={showUpdate ? singleUpdateData.task : null}
-                        placeholder="Enter text"
-                        className={`block p-2 w-full text-sm  text-gray-900 rounded-lg border border-gray-300 outline-none dark:placeholder-gray dark:text-black ${showFormData ? 'bg-gray-100' :' bg-white'}`}
-                        onChange={(e) => {
-                          showUpdate
-                            ? setSingleUpdateData({
-                                _id: singleUpdateData._id,
-                                deadlineDate: singleUpdateData.deadlineDate,
-                                remarks: singleUpdateData.remarks,
-                                startTime: singleUpdateData.startTime,
-                                taskPriority: singleUpdateData.taskPriority,
-                                time: singleUpdateData.time,
-                                task: e.target.value,
-                                pinTask:singleUpdateData.pinTask,
-                                status: singleUpdateData.status,
-                              })
-                            : e.target.value;
-                        }}
-                      />
-                    </div>
-                    <div  className="mt-2">
-                      <label
-                        htmlFor="message"
-                        className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
-                      >
-                        Choose Priority
-                      </label>
-                      <Select
-                        options={options}
-                        className="rounded-2xl text-black"
-                        isDisabled={showFormData}
-                        value={
-                          showUpdate
-                            ? options.find(
-                                (x) => x.value == singleUpdateData?.taskPriority
-                              )
-                            : options.find((x) => x.value == priorityValue)
-                        }
-                        onChange={(e) =>
-                          showUpdate
-                            ? setSingleUpdateData({
-                                _id: singleUpdateData._id,
-                                deadlineDate: singleUpdateData.deadlineDate,
-                                remarks: singleUpdateData.remarks,
-                                startTime: singleUpdateData.startTime,
-                                taskPriority: e.value,
-                                time: singleUpdateData.time,
-                                task: singleUpdateData.task,
-                                pinTask:singleUpdateData.pinTask,
-                                status: singleUpdateData.status,
-                              })
-                            : setPriorityValue(e.value)
-                        }
-                      />
-                    </div>
-                   
-                    <div className="mt-2">
-                      <label
-                        htmlFor="message"
-                        className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
-                      >
-                        Close Time
-                      </label>
-                      <input
-                        type="time"
-                        name="time"
-                        disabled={showFormData}
-                        value={showUpdate ? singleUpdateData.time : null}
-                        onChange={(e) => {
-                          console.log(e.target.value)
-                          showUpdate
-                          ? setSingleUpdateData({
-                              _id: singleUpdateData._id,
-                              deadlineDate: singleUpdateData.deadlineDate,
-                              remarks: singleUpdateData.remarks,
-                              startTime: singleUpdateData.startTime,
-                              taskPriority: singleUpdateData.taskPriority,
-                              time: e.target.value,
-                              task: singleUpdateData.task,
-                              pinTask:singleUpdateData.pinTask,
-                              status: singleUpdateData.status,
-                            })
-                          : e.target.value;
-                        }}
-                        placeholder="Enter start time in 24 hour format e.g. 08:00PM"
-                        className={`block p-2 w-full text-sm   text-gray-900 rounded-lg border border-gray-300 outline-none dark:placeholder-black dark:text-black ${showFormData ? 'bg-gray-100' :' bg-white'}`}
-                      ></input>
-                    </div>
-                    <div className="mt-2">
-                      <label
-                        htmlFor="message"
-                        className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
-                      >
-                        Close Date
-                      </label>
-                      <input
-                        type="date"
-                        name="date"
-                        disabled={showFormData}
-                        value={showUpdate ? singleUpdateData.deadlineDate : null}
-                        className={`block p-2 w-full text-sm text-gray-900 rounded-lg border border-gray-300 outline-none dark:placeholder-gray-400 dark:text-black ${showFormData ? 'bg-gray-100' :' bg-white'}`}
-                        onChange={(e) => {
-                          if (formattedDate > e.target.value) {
-                            swal(
-                              "Not Possible!",
-                              "Please select valid date",
-                              "warning"
-                            );
-                            e.target.value = "";
-                          } else {
+                    <div className="shadow-2xl p-4 rounded-md">
+                      {showUpdate ? (
+                        <>
+                          <div className="mb-2">
+                            <label
+                              htmlFor="message"
+                              className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
+                            >
+                              Select task for update
+                            </label>
+                            <Select
+                              options={dataOption}
+                              className="rounded-2xl text-black"
+                              onChange={(e) => {
+                                setPriorityValue(e.value);
+                                const filterSingleData = data.filter(
+                                  (x) => x._id == e.value
+                                );
+                                // dispatch(fetchTaskById(filterSingleData))
+                                setSingleUpdateData(filterSingleData[0]);
+                                setShowFormData(false);
+                              }}
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        ""
+                      )}
+                      <div>
+                        <label
+                          htmlFor="message"
+                          className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
+                        >
+                          Task Name
+                        </label>
+                        <input
+                          type="text"
+                          name="name"
+                          disabled={showFormData}
+                          value={showUpdate ? singleUpdateData.task : null}
+                          placeholder="Enter text"
+                          className={`block p-2 w-full text-sm  text-gray-900 rounded-lg border border-gray-300 outline-none dark:placeholder-gray dark:text-black ${
+                            showFormData ? "bg-gray-100" : " bg-white"
+                          }`}
+                          onChange={(e) => {
                             showUpdate
-                            ? setSingleUpdateData({
-                                _id: singleUpdateData._id,
-                                deadlineDate: e.target.value,
-                                remarks: singleUpdateData.remarks,
-                                startTime: singleUpdateData.startTime,
-                                taskPriority: singleUpdateData.taskPriority,
-                                time: singleUpdateData.time,
-                                task: singleUpdateData.task,
-                                pinTask:singleUpdateData.pinTask,
-                                status: singleUpdateData.status,
-                              })
-                            : e.target.value;
+                              ? setSingleUpdateData({
+                                  _id: singleUpdateData._id,
+                                  deadlineDate: singleUpdateData.deadlineDate,
+                                  remarks: singleUpdateData.remarks,
+                                  startTime: singleUpdateData.startTime,
+                                  taskPriority: singleUpdateData.taskPriority,
+                                  time: singleUpdateData.time,
+                                  task: e.target.value,
+                                  pinTask: singleUpdateData.pinTask,
+                                  status: singleUpdateData.status,
+                                  markNotification:singleUpdateData.markNotification,
+                                  priviousStatus:singleUpdateData.priviousStatus,
+                                  taskSubmissionDate:
+                                    singleUpdateData.taskSubmissionDate,
+                                  taskCompletionDate:
+                                    singleUpdateData.taskCompletionDate,
+                                })
+                              : e.target.value;
+                          }}
+                        />
+                      </div>
+                      <div className="mt-2">
+                        <label
+                          htmlFor="message"
+                          className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
+                        >
+                          Choose Priority
+                        </label>
+                        <Select
+                          options={options}
+                          className="rounded-2xl text-black"
+                          isDisabled={showFormData}
+                          value={
+                            showUpdate
+                              ? options.find(
+                                  (x) =>
+                                    x.value == singleUpdateData?.taskPriority
+                                )
+                              : options.find((x) => x.value == priorityValue)
                           }
-                        }}
-                      ></input>
+                          onChange={(e) =>
+                            showUpdate
+                              ? setSingleUpdateData({
+                                  _id: singleUpdateData._id,
+                                  deadlineDate: singleUpdateData.deadlineDate,
+                                  remarks: singleUpdateData.remarks,
+                                  startTime: singleUpdateData.startTime,
+                                  taskPriority: e.value,
+                                  time: singleUpdateData.time,
+                                  task: singleUpdateData.task,
+                                  pinTask: singleUpdateData.pinTask,
+                                  status: singleUpdateData.status,
+                                  markNotification:singleUpdateData.markNotification,
+                                  priviousStatus:singleUpdateData.priviousStatus,
+                                  taskSubmissionDate:
+                                  singleUpdateData.taskSubmissionDate,
+                                taskCompletionDate:
+                                  singleUpdateData.taskCompletionDate,
+                                })
+                              : setPriorityValue(e.value)
+                          }
+                        />
+                      </div>
+
+                      <div className="mt-2">
+                        <label
+                          htmlFor="message"
+                          className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
+                        >
+                          Close Time
+                        </label>
+                        <input
+                          type="time"
+                          name="time"
+                          disabled={showFormData}
+                          value={showUpdate ? singleUpdateData.time : null}
+                          onChange={(e) => {
+                            console.log(e.target.value);
+                            showUpdate
+                              ? setSingleUpdateData({
+                                  _id: singleUpdateData._id,
+                                  deadlineDate: singleUpdateData.deadlineDate,
+                                  remarks: singleUpdateData.remarks,
+                                  startTime: singleUpdateData.startTime,
+                                  taskPriority: singleUpdateData.taskPriority,
+                                  time: e.target.value,
+                                  task: singleUpdateData.task,
+                                  pinTask: singleUpdateData.pinTask,
+                                  status: singleUpdateData.status,
+                                  markNotification:singleUpdateData.markNotification,
+                                  priviousStatus:singleUpdateData.priviousStatus,
+                                  taskSubmissionDate:
+                                  singleUpdateData.taskSubmissionDate,
+                                taskCompletionDate:
+                                  singleUpdateData.taskCompletionDate,
+                                })
+                              : e.target.value;
+                          }}
+                          placeholder="Enter start time in 24 hour format e.g. 08:00PM"
+                          className={`block p-2 w-full text-sm   text-gray-900 rounded-lg border border-gray-300 outline-none dark:placeholder-black dark:text-black ${
+                            showFormData ? "bg-gray-100" : " bg-white"
+                          }`}
+                        ></input>
+                      </div>
+                      <div className="mt-2">
+                        <label
+                          htmlFor="message"
+                          className="block mb-2 text-[16px] font-medium text-gray-900 dark:text-black"
+                        >
+                          Close Date
+                        </label>
+                        <input
+                          type="date"
+                          name="date"
+                          disabled={showFormData}
+                          value={
+                            showUpdate ? singleUpdateData.deadlineDate : null
+                          }
+                          className={`block p-2 w-full text-sm text-gray-900 rounded-lg border border-gray-300 outline-none dark:placeholder-gray-400 dark:text-black ${
+                            showFormData ? "bg-gray-100" : " bg-white"
+                          }`}
+                          onChange={(e) => {
+                            if (formattedDate > e.target.value) {
+                              swal({
+                                title: "Not Possible!",
+                                text: "Please select valid date",
+                                icon: "warning",
+                                button: "OK",
+                              });
+                              e.target.value = "";
+                            } else {
+                              showUpdate
+                                ? setSingleUpdateData({
+                                    _id: singleUpdateData._id,
+                                    deadlineDate: e.target.value,
+                                    remarks: singleUpdateData.remarks,
+                                    startTime: singleUpdateData.startTime,
+                                    taskPriority: singleUpdateData.taskPriority,
+                                    time: singleUpdateData.time,
+                                    task: singleUpdateData.task,
+                                    pinTask: singleUpdateData.pinTask,
+                                    status: singleUpdateData.status,
+                                    markNotification:singleUpdateData.markNotification,
+                                    priviousStatus:singleUpdateData.priviousStatus,
+                                    taskSubmissionDate:
+                                    singleUpdateData.taskSubmissionDate,
+                                  taskCompletionDate:
+                                    singleUpdateData.taskCompletionDate,
+                                  })
+                                : e.target.value;
+                            }
+                          }}
+                        ></input>
+                      </div>
+                      <button className=" bg-[#d7888a] text-black text-[17px] mt-2 p-2 w-[50%] mx-auto rounded-md flex justify-center">
+                        {showUpdate ? "Update" : "Save"}
+                      </button>
                     </div>
-                    <button className=" bg-[#d7888a] text-black text-[17px] mt-2 p-2 w-[50%] mx-auto rounded-md flex justify-center">
-                      {showUpdate ? "Update" : "Save"}
-                    </button>
-                   </div>
                   </div>
                 </div>
               </div>
             </div>
             <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
-
           </>
         ) : null}
       </form>
-      {notificationModal && countNotification.length != 0 ? (
-          <NotificationModal
-            setNotificationModal={setNotificationModal}
-            countNotification={countNotification}
-          ></NotificationModal>):'' }
+      {notificationModal && notification.length != 0 ? (
+        <NotificationModal
+          setNotificationModal={setNotificationModal}
+          countNotification={countNotification}
+        ></NotificationModal>
+      ) : (
+        ""
+      )}
     </>
- 
   );
 };
 

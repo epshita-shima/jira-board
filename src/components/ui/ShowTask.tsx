@@ -15,6 +15,11 @@ import { useSelector } from "react-redux";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import "./Showtask.css";
 import swal from "sweetalert";
+import {
+  fetchNoticationPost,
+  fetchNotificationGet,
+} from "../../redux/features/notification/notificationSlice";
+import NotificationModal from "./NotificationModal";
 
 const ShowTask = ({
   setShowModal,
@@ -22,13 +27,36 @@ const ShowTask = ({
   setShowFormData,
   deleteTaskModal,
   setDeleteTaskModal,
+  columnName,
+  setColumnName,
+
 }) => {
   const [data, setData] = useState([]);
   const dispatch = useDispatch<AppDispatch>();
+  const dispatch2 = useDispatch<AppDispatch>();
+  const dispatch3 = useDispatch<AppDispatch>();
+  const dispatch4 = useDispatch<AppDispatch>();
+  const [startDate, setStartDate] = useState(new Date());
   const [filteredDropData, setFilteredDropData] = useState([]);
   const [pinTaskData, setPinTaskData] = useState([]);
+  const [notificationGetData, setNotififationGetData] = useState([]);
+
   const tasks = useSelector((state) => state.boardview);
   const columns = tasks;
+  console.log(columns)
+
+  const date_data = startDate;
+  const newDate = new Date(date_data);
+  const year = newDate.toLocaleString("default", {
+    year: "numeric",
+  });
+  const month = newDate.toLocaleString("default", {
+    month: "2-digit",
+  });
+  const day = newDate.toLocaleString("default", {
+    day: "2-digit",
+  });
+  const formattedDate = year + "-" + month + "-" + day;
 
   useEffect(() => {
     const mergeResult = [].concat(
@@ -48,35 +76,57 @@ const ShowTask = ({
   ]);
 
   useEffect(() => {
-    dispatch(fetchTasks());
+    const fetchData = async () => {
+      try {
+        await dispatch(fetchTasks());
+        await dispatch(fetchNotificationGet());
+      } catch (error) {
+        console.error('Error fetching data:', error.message);
+      }
+    };
+    fetchData();
   }, [dispatch]);
 
   const onDragStart = async (start) => {
     const filterSourceData = await data.filter(
       (item) => item._id == start.draggableId
     );
+    console.log(filterSourceData);
     setFilteredDropData(filterSourceData);
   };
 
-  const onDragEnd = (result) => {
+  const onDragEnd = async(result) => {
     if (!result.destination) return;
-    dispatch(taskMove(result));
-    dispatch(fetchUpdateTasks(filteredDropData));
+  await  dispatch(taskMove(result));
+  await  dispatch3(fetchUpdateTasks(filteredDropData));
+    console.log(filteredDropData)
+   await dispatch4(fetchNoticationPost(filteredDropData[0]));
   };
 
   const onDragUpdate = (updateDestination) => {
     const { destination } = updateDestination;
+    const starttimeString = filteredDropData[0]?.startTime;
+    const now = new Date().getTime();
+    const finishTaskcalculate = new Date(starttimeString).getTime();
+    const finishtask = now - finishTaskcalculate;
+
+    const finishDays = Math.floor(finishtask / (1000 * 60 * 60 * 24));
     if (destination != null) {
       setFilteredDropData((prevState) => {
         return prevState.map((item) => ({
           ...item,
           status: destination.droppableId,
+          priviousStatus: item.status,
+          taskSubmissionDate: formattedDate,
+          taskCompletionDate: finishDays,
+          markNotification: "",
         }));
       });
     }
   };
+
   const handlePinTask = () => {
-    console.log('click')
+    console.log("click");
     const filterTaskTodo = tasks.toDo.items.filter(
       (x) => x.pinTask == "pinned" && x.status == pinTaskData.status
     );
@@ -117,10 +167,11 @@ const ShowTask = ({
       swal("Task pined successfully", "success");
     }
   };
-  const handleRemovePinTask=()=>{
-    dispatch(fetchTaskById(pinTaskData));
+
+  const handleRemovePinTask = async () => {
+    await dispatch(fetchTaskById(pinTaskData));
     swal("Task unpined successfully", "success");
-  }
+  };
 
   return (
     <div
@@ -133,6 +184,7 @@ const ShowTask = ({
       >
         {Object.entries(columns)?.map(([columnId]) => {
           const column = columns[columnId];
+          console.log(column)
           return (
             // <div c lassName="flex">
             <div
@@ -159,22 +211,30 @@ const ShowTask = ({
                       tabindex="0"
                       className="dropdown-content z-[1] left-[-115px] menu p-2 shadow text-black bg-gray-100 rounded-box "
                     >
-                      <li
-                        className="border-b"
-                        onClick={() => {
-                          setShowModal(true);
-                          setShowUpdate(false);
-                          setShowFormData(false);
-                        }}
-                      >
-                        <a>Add Task</a>
-                      </li>
+                      {column.name == "In Progress" ||
+                      column.name == "Unit Test" ||
+                      column.name == "Quality Assurance" ||
+                      column.name == "Completed" ? (
+                        ""
+                      ) : (
+                        <li
+                          className="border-b"
+                          onClick={() => {
+                            setShowModal(true);
+                            setShowUpdate(false);
+                            setShowFormData(false);
+                          }}
+                        >
+                          <a>Add Task</a>
+                        </li>
+                      )}
 
                       <li
                         className="border-b"
                         onClick={() => {
                           setShowModal(true);
                           setShowUpdate(true);
+                          setColumnName(column.name);
                         }}
                       >
                         <a>Update Task</a>
@@ -184,6 +244,7 @@ const ShowTask = ({
                         className="border-b"
                         onClick={() => {
                           setDeleteTaskModal(true);
+                          setColumnName(column.name);
                         }}
                       >
                         <a>Delete Task</a>
@@ -208,19 +269,59 @@ const ShowTask = ({
                               ) : (
                                 ""
                               )}
-
-                              <p className="text-black text-[15px]">
-                                {item?.task}
-                              </p>
+                              <div>
+                                <div>
+                                  <p className="text-black text-[15px]">
+                                    {item?.task}
+                                  </p>
+                                  <p className="text-black text-[15px]">
+                                    Close Time:
+                                    <b>{item?.time}</b>
+                                  </p>
+                                  <p className="text-black text-[15px]">
+                                    Close Date:
+                                    <b>{item?.deadlineDate}</b>
+                                  </p>
+                                </div>
+                                <div className="dropdown ">
+                                  <button
+                                    className=" text-white text-[15px] font-bold border px-1 bg-orange-400"
+                                    onClick={() => {
+                                      setPinTaskData({
+                                        _id: item._id,
+                                        deadlineDate: item.deadlineDate,
+                                        remarks: item.remarks,
+                                        startTime: item.startTime,
+                                        taskPriority: item.taskPriority,
+                                        time: item.time,
+                                        task: item.task,
+                                        pinTask: " ",
+                                        status: item.status,
+                                        markNotification: item.markNotification,
+                                        priviousStatus: item.status,
+                                        taskSubmissionDate:
+                                          item.taskSubmissionDate,
+                                        taskCompletionDate:
+                                          item.taskCompletionDate,
+                                      });
+                                    }}
+                                  >
+                                    Action
+                                  </button>
+                                  <div className="dropdown-content z-[1] menu p-2 shadow text-black bg-gray-100 rounded-box w-36 text-center">
+                                    <a
+                                      href="#"
+                                      className="text-black"
+                                      onClick={() => {
+                                        handleRemovePinTask();
+                                      }}
+                                    >
+                                      Remove Pin Task
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                            <p className="text-black text-[15px]">
-                              (Close Time:
-                              <b>{item?.time}</b>)
-                            </p>
-                            <p className="text-black text-[15px]">
-                              (Close Date:
-                              <b>{item?.deadlineDate}</b>)
-                            </p>
                           </div>
                         ) : (
                           ""
@@ -241,11 +342,10 @@ const ShowTask = ({
                             ? "lightblue"
                             : "#F8F9FA",
                           padding: 4,
-                          
                         }}
-                        className="scrollbar-thin scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thumb-slate-500 scrollbar-track-slate-300  overflow-y-scroll w-full sm:h-[250px] md:h-[150px] lg:h-[310px] xl:h-[310px] 2xl:h-[630px]"
+                        className="scrollbar-thin scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thumb-slate-500 scrollbar-track-slate-300  overflow-y-scroll w-full sm:h-[250px] md:h-[150px] lg:h-[280px] xl:h-[280px] 2xl:h-[630px]"
                       >
-                        {column?.items?.map((item, index) => {
+                        {column?.items?.map((item, index: number) => {
                           const dateString = item?.deadlineDate;
                           const timeString = item?.time;
                           const starttimeString = item?.startTime;
@@ -254,14 +354,16 @@ const ShowTask = ({
                           const futureDate = new Date(
                             dateString + " " + timeString
                           ).getTime();
-                          const finishTaskcalculate= new Date(starttimeString).getTime();
-                          const finishTaskcalculate1= new Date(dateString).getTime();
-                          const calculateDate=finishTaskcalculate1-finishTaskcalculate
-                          console.log(calculateDate)
-                          const dayForFinishTask = Math.floor(
-                            calculateDate / (1000 * 60 * 60 * 24)
+                          const finishTaskcalculate = new Date(
+                            starttimeString
+                          ).getTime();
+
+                          const finishtask = now - finishTaskcalculate;
+
+                          const finishDays = Math.floor(
+                            finishtask / (1000 * 60 * 60 * 24)
                           );
-                          console.log(dayForFinishTask)
+
                           const timeleft = futureDate - now;
                           const days = Math.floor(
                             timeleft / (1000 * 60 * 60 * 24)
@@ -287,144 +389,173 @@ const ShowTask = ({
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
                                   >
-                                    <ul
-                                      className={`mb-6 px-2 pb-2 bg-white shadow-xl rounded-md`}
-                                      style={{ border: "1px solid #d1d5db" }}
-                                    >
-                                      <>
-                                        <div
-                                          className={`flex justify-between items-center shadow-sm mb-1`}
-                                        >
-                                          <div className="dropdown">
-                                            <button
-                                              className=" text-black text-[20px] font-bold"
-                                              onClick={() => {
-                                                if(item.pinTask =="pinned"){
-                                                  setPinTaskData({
-                                                    _id: item._id,
-                                                    deadlineDate:
-                                                      item.deadlineDate,
-                                                    remarks: item.remarks,
-                                                    startTime: item.startTime,
-                                                    taskPriority:
-                                                      item.taskPriority,
-                                                    time: item.time,
-                                                    task: item.task,
-                                                    pinTask: " ",
-                                                    status: item.status,
-                                                  });
-                                                }
-                                               else{
-                                                setPinTaskData({
-                                                  _id: item._id,
-                                                  deadlineDate:
-                                                    item.deadlineDate,
-                                                  remarks: item.remarks,
-                                                  startTime: item.startTime,
-                                                  taskPriority:
-                                                    item.taskPriority,
-                                                  time: item.time,
-                                                  task: item.task,
-                                                  pinTask: "pinned",
-                                                  status: item.status,
-                                                });
-                                               }
-                                              }}
-                                            >
-                                              ...
-                                            </button>
-                                            <div className="dropdown-content z-[1] menu p-2 shadow text-black bg-gray-100 rounded-box w-36 text-center">
-                                              
-                                              {
-                                                item.pinTask =="pinned" ? ( <a
-                                                  href="#"
-                                                  className="text-black"
-                                                  onClick={() => {
-                                                    handleRemovePinTask();
-                                                  }}
-                                                >
-                                                  Remove Pin Task
-                                                </a>) :(<a
-                                                href="#"
-                                                className="text-black"
+                                    {item.pinTask == "pinned" ? (
+                                      ""
+                                    ) : (
+                                      <ul
+                                        className={`mb-6 px-2 pb-2 bg-white shadow-xl rounded-md`}
+                                        style={{ border: "1px solid #d1d5db" }}
+                                      >
+                                        <>
+                                          <div
+                                            className={`flex justify-between items-center shadow-sm mb-1`}
+                                          >
+                                            <div className="dropdown">
+                                              <button
+                                                className=" text-black text-[20px] font-bold"
                                                 onClick={() => {
-                                                  handlePinTask();
+                                                  if (
+                                                    item.pinTask == "pinned"
+                                                  ) {
+                                                    setPinTaskData({
+                                                      _id: item._id,
+                                                      deadlineDate:
+                                                        item.deadlineDate,
+                                                      remarks: item.remarks,
+                                                      startTime: item.startTime,
+                                                      taskPriority:
+                                                        item.taskPriority,
+                                                      time: item.time,
+                                                      task: item.task,
+                                                      pinTask: " ",
+                                                      status: item.status,
+                                                      markNotification:
+                                                        item.markNotification,
+                                                      priviousStatus:
+                                                        item.status,
+                                                      taskSubmissionDate:
+                                                        item.taskSubmissionDate,
+                                                      taskCompletionDate:
+                                                        item.taskCompletionDate,
+                                                    });
+                                                  } else {
+                                                    setPinTaskData({
+                                                      _id: item._id,
+                                                      deadlineDate:
+                                                        item.deadlineDate,
+                                                      remarks: item.remarks,
+                                                      startTime: item.startTime,
+                                                      taskPriority:
+                                                        item.taskPriority,
+                                                      time: item.time,
+                                                      task: item.task,
+                                                      pinTask: "pinned",
+                                                      status: item.status,
+                                                      markNotification:
+                                                        item.markNotification,
+                                                      priviousStatus:
+                                                        item.status,
+                                                      taskSubmissionDate:
+                                                        item.taskSubmissionDate,
+                                                      taskCompletionDate:
+                                                        item.taskCompletionDate,
+                                                    });
+                                                  }
                                                 }}
                                               >
-                                                Pin Task
-                                              </a>)
-                                              }
+                                                ...
+                                              </button>
+                                              <div className="dropdown-content z-[1] menu p-2 shadow text-black bg-gray-100 rounded-box w-36 text-center">
+                                                {item.pinTask == "pinned" ? (
+                                                  <a
+                                                    href="#"
+                                                    className="text-black"
+                                                    onClick={() => {
+                                                      handleRemovePinTask();
+                                                    }}
+                                                  >
+                                                    Remove Pin Task
+                                                  </a>
+                                                ) : (
+                                                  <a
+                                                    href="#"
+                                                    className="text-black"
+                                                    onClick={() => {
+                                                      handlePinTask();
+                                                    }}
+                                                  >
+                                                    Pin Task
+                                                  </a>
+                                                )}
+                                              </div>
                                             </div>
+                                            {item.taskPriority !== "" &&
+                                            item.taskPriority == "high" ? (
+                                              <div className="w-4 h-4 rounded-full bg-red-500"></div>
+                                            ) : (
+                                              ""
+                                            )}
+                                            {item.taskPriority !== "" &&
+                                            item.taskPriority == "low" ? (
+                                              <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                                            ) : (
+                                              ""
+                                            )}
+                                            {item.taskPriority !== "" &&
+                                            item.taskPriority == "medium" ? (
+                                              <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+                                            ) : (
+                                              ""
+                                            )}
                                           </div>
-                                          {item.taskPriority !== "" &&
-                                          item.taskPriority == "high" ? (
-                                            <div className="w-4 h-4 rounded-full bg-red-500"></div>
+
+                                          <li className="text-black text-[15px]">
+                                            {item?.task}
+                                          </li>
+                                          <p className="text-black text-[15px]">
+                                            Close Time:{" "}
+                                            <b className="text-[15px]">
+                                              {item?.time}
+                                            </b>
+                                          </p>
+                                          <p className="text-black text-[15px]">
+                                            Close Date:{" "}
+                                            <b className="text-[15px]">
+                                              {item?.deadlineDate}
+                                            </b>
+                                          </p>
+                                          {item.status == "done" ? (
+                                            <>
+                                              <p className="text-black text-[15px]">
+                                                Task Complete Time:
+                                                <strong>
+                                                  {item.taskCompletionDate} days
+                                                </strong>
+                                              </p>
+                                            </>
                                           ) : (
-                                            ""
+                                            <>
+                                              {days <= 2 && days > 0 ? (
+                                                <p className="text-red-500 text-[15px]">
+                                                  <b>
+                                                    Remaining Time: {days} days
+                                                    {hours} hours {minutes}{" "}
+                                                    minutes
+                                                  </b>
+                                                </p>
+                                              ) : days < 0 ? (
+                                                <p className="text-black text-[15px]">
+                                                  Remaining Time:
+                                                  <b className=" text-red-600">
+                                                    {/* {days} days {hours} hours{" "}
+                                                {minutes} minutes  */}
+                                                    off
+                                                  </b>
+                                                </p>
+                                              ) : (
+                                                <p className="text-black">
+                                                  Remaining Time:
+                                                  <b className="text-[15px]">
+                                                    {days} days {hours} hours{" "}
+                                                    {minutes} minutes
+                                                  </b>
+                                                </p>
+                                              )}
+                                            </>
                                           )}
-                                          {item.taskPriority !== "" &&
-                                          item.taskPriority == "low" ? (
-                                            <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                                          ) : (
-                                            ""
-                                          )}
-                                          {item.taskPriority !== "" &&
-                                          item.taskPriority == "medium" ? (
-                                            <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
-                                          ) : (
-                                            ""
-                                          )}
-                                        </div>
-                                        <li className="text-black text-[15px]">
-                                          {item?.task}
-                                        </li>
-                                        <p className="text-black text-[15px]">
-                                          Close Time:{" "}
-                                          <b className="text-[15px]">
-                                            {item?.time}
-                                          </b>
-                                        </p>
-                                        <p className="text-black text-[15px]">
-                                          Close Date:{" "}
-                                          <b className="text-[15px]">
-                                            {item?.deadlineDate}
-                                          </b>
-                                        </p>
-                                        {
-                                          item.status == 'done' ? <>
-                                          <p className="text-black text-[15px]">Task Complete Time: <strong>{dayForFinishTask} days</strong></p>
-                                          </> : <>
-                                            {days <= 2 && days > 0  ? (
-                                            <p className="text-red-500 text-[15px]">
-                                              <b>
-                                                Remaining Time: {days} days
-                                                {hours} hours {minutes} minutes
-                                              </b>
-                                            </p>
-                                          ) : days < 0 ? (
-                                            <p className="text-black text-[15px]">
-                                              Remaining Time:
-                                              <b className=" text-red-600">
-                                                {/* {days} days {hours} hours{" "}
-                                                  {minutes} minutes  */}
-                                                off
-                                              </b>
-                                            </p>
-                                          ) : (
-                                            <p className="text-black">
-                                              Remaining Time:
-                                              <b className="text-[15px]">
-                                                {days} days {hours} hours{" "}
-                                                {minutes} minutes
-                                              </b>
-                                            </p>
-                                          )}
-                                          </>
-                                        
-                                        }
-                                        
-                                      </>
-                                    </ul>
+                                        </>
+                                      </ul>
+                                    )}
                                   </div>
                                 );
                               }}
@@ -440,15 +571,9 @@ const ShowTask = ({
               {deleteTaskModal ? (
                 <UpdateTakModal
                   setDeleteTaskModal={setDeleteTaskModal}
+                  columnName={columnName}
                 ></UpdateTakModal>
               ) : null}
-              {/* {singleTaskModal ? (
-                <SingleItemModal
-                  setSingleTaskModal={setSingleTaskModal}
-                  singleTaskDetails={singleTaskDetails}
-                  setSingleTaskDetails={setSingleTaskDetails}
-                ></SingleItemModal>
-              ) : null} */}
             </div>
           );
         })}
