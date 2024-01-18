@@ -16,12 +16,10 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
   const [finishDate, setFinishDate] = useState(new Date());
   const [endDate, setEndDate] = useState(null);
   const [expanDate, setExpanDate] = useState("");
-  const [data, setData] = useState([]);
+  const [notificationData,setNotificationData] = useState([]);
   const dispatch = useDispatch();
   console.log(countNotification);
   console.log(endDate);
-const notification=useSelector((state) => state.notificationView.data);
-console.log(notification)
   const tasks = useSelector((state) => state.boardview);
   console.log(countNotification);
   useEffect(() => {
@@ -30,15 +28,18 @@ console.log(notification)
       tasks.inProgress.items,
       tasks.unitTest.items,
       tasks.qualityAssurance.items,
-      tasks.done.items
+      tasks.completed.items
     );
-    setData(mergeResult);
+    const filterNotificationData=mergeResult.filter((data)=>(data.markNotification == ""))
+    console.log(filterNotificationData)
+    setNotificationData(filterNotificationData)
   }, [
     tasks.toDo.items,
     tasks.inProgress.items,
     tasks.unitTest.items,
     tasks.qualityAssurance.items,
-    tasks.done.items
+    tasks.completed.items,
+    setNotificationData
   ]);
   useEffect(() => {
     dispatch(fetchTasks());
@@ -67,15 +68,38 @@ console.log(notification)
       deadlineDate: finishDate.toLocaleDateString("en-CA"),
       startTime:singleItem?.startTime,
       remarks: comments,
-      pinTask:singleItem.pinTask,
-      taskPriority: singleItem.taskPriority,
+      pinTask: singleItem.pinTask,
+      taskPriority:singleItem.taskPriority,
+      markNotification:'viewed',
+      priviousStatus:singleItem.priviousStatus,
+      taskSubmissionDate:singleItem.taskSubmissionDate,
+      taskCompletionDate:singleItem.taskCompletionDate,
     };
     console.log(updateData);
     await dispatch(fetchTaskById(updateData));
     swal("Not approve yet.", "Admin will check and let you know..", "success");
     setUpdateEstimateDate(false);
   };
-
+const handleNotificationViewData=async(data)=>{
+  const updateData = {
+    _id: data?._id,
+    task: data?.task,
+    status: data?.status,
+    time: data?.time,
+    deadlineDate: data.deadlineDate,
+    startTime:data?.startTime,
+    remarks: data.remarks,
+    taskPriority:data.taskPriority,
+    pinTask: data.pinTask,
+    markNotification:'viewed',
+    priviousStatus:data.priviousStatus,
+    taskSubmissionDate:data.taskSubmissionDate,
+    taskCompletionDate:data.taskCompletionDate,
+  };
+  console.log(updateData);
+    await dispatch(fetchTaskById(updateData));
+  
+}
   useEffect(() => {
     console.log(singleItem?.deadlineDate);
     const newDates = new Date(singleItem?.deadlineDate);
@@ -100,12 +124,12 @@ console.log(notification)
   return (
     <>
       <div className=" justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
-        <div className="relative sm:w-[60%] md:w-[60%] lg:w-[60%] xl:w-[70%] 2xl:w-[70%] my-6 mx-auto ">
+        <div className="relative sm:w-[60%] md:w-[60%] lg:w-[60%] xl:w-[70%] 2xl:w-[70%]  mx-auto ">
           {/*content*/}
-          <div className="border-0 rounded-lg   relative flex flex-col w-full bg-emerald-700 shadow-2xl outline-none focus:outline-none">
+          <div className="border-0 rounded-lg   relative flex flex-col w-full bg-white shadow-2xl outline-none focus:outline-none">
             {/*header*/}
             <div className="flex items-start justify-between p-5 border-b border-solid border-gray-500 rounded-t">
-              <h3 className="text-xl font-semibold text-white">
+              <h3 className="text-xl font-bold text-black">
                 Task Notification
               </h3>
               <button
@@ -119,35 +143,35 @@ console.log(notification)
             </div>
             {/*body*/}
 
-            <div className="relative p-6 flex-auto justify-between items-center  my-4 w-[90%] mx-auto rounded-xl">
-              {countNotification?.map((item, index) => {
+            <div className="relative flex-auto justify-between items-center mx-auto rounded-xl p-4">
+              {notificationData?.map((item, index) => {
                 console.log(item);
 
-                const findMatchingIndices = (data, countNotification) => {
-                  const matchingIndices = [];
-                  data.forEach((element, index) => {
-                    console.log();
-                    if (countNotification.includes(element)) {
-                      matchingIndices.push(index + 1);
-                    }
-                  });
-                  return matchingIndices;
-                };
+                // const findMatchingIndices = (data, countNotification) => {
+                //   const matchingIndices = [];
+                //   data.forEach((element, index) => {
+                //     console.log();
+                //     if (countNotification.includes(element)) {
+                //       matchingIndices.push(index + 1);
+                //     }
+                //   });
+                //   return matchingIndices;
+                // };
 
-                const matchingIndices = findMatchingIndices(
-                  data,
-                  countNotification
-                );
-                console.log(matchingIndices);
+                // const matchingIndices = findMatchingIndices(
+                //   data,
+                //   countNotification
+                // );
+                // console.log(matchingIndices);
                 return (
-                  <div className="flex justify-between  py-1  mt-2 items-center  text-white border-b-2">
+                  <div className={` flex justify-between   items-center  text-black border-b-2  px-4 py-2 ${item.markNotification =="" ? 'bg-slate-200' : 'bg-white' }`}>
                     <div className="w-[70%]">
-                      <mark className="px-1">
-                        Task No: {matchingIndices[index]},that is in
-                        <span className="text-red-700">{item.status}</span>
-                        state
-                        <mark> {item.task}</mark>
-                      </mark>
+                      
+                        Task No: That is in previous State was <span className="text-red-500">{item.priviousStatus}</span>&nbsp; 
+                        and present state <span className="text-red-500">{item.status}</span>&nbsp;
+                        state is
+                        <mark> {item.task}</mark>&nbsp;
+                      
                       time will expired within 2 days
                     </div>
                     <button
@@ -156,9 +180,20 @@ console.log(notification)
                         handleGetSingleData(item);
                         setUpdateEstimateDate(true);
                         setSingleItem(item);
+                        
                       }}
                     >
                       Mark as Read
+                    </button>
+                    <button
+                      className=" px-2 py-1 text-black font-bold bg-gray-100 rounded"
+                      onClick={() => {
+                        handleGetSingleData(item);
+                        setSingleItem(item);
+                        handleNotificationViewData(item)
+                      }}
+                    >
+                      View
                     </button>
                   </div>
                 );

@@ -29,17 +29,14 @@ const ShowTask = ({
   setDeleteTaskModal,
   columnName,
   setColumnName,
-
+  countNotification, setCountNotification
 }) => {
   const [data, setData] = useState([]);
   const dispatch = useDispatch<AppDispatch>();
-  const dispatch2 = useDispatch<AppDispatch>();
-  const dispatch3 = useDispatch<AppDispatch>();
-  const dispatch4 = useDispatch<AppDispatch>();
   const [startDate, setStartDate] = useState(new Date());
   const [filteredDropData, setFilteredDropData] = useState([]);
   const [pinTaskData, setPinTaskData] = useState([]);
-  const [notificationGetData, setNotififationGetData] = useState([]);
+  const [previousStatusData,setPreviousStatusData] = useState('');
 
   const tasks = useSelector((state) => state.boardview);
   const columns = tasks;
@@ -64,7 +61,7 @@ const ShowTask = ({
       tasks.inProgress.items,
       tasks.unitTest.items,
       tasks.qualityAssurance.items,
-      tasks.done.items
+      tasks.completed.items
     );
     setData(mergeResult);
   }, [
@@ -72,7 +69,7 @@ const ShowTask = ({
     tasks.inProgress.items,
     tasks.unitTest.items,
     tasks.qualityAssurance.items,
-    tasks.done.items,
+    tasks.completed.items,
   ]);
 
   useEffect(() => {
@@ -88,35 +85,39 @@ const ShowTask = ({
   }, [dispatch]);
 
   const onDragStart = async (start) => {
+   const {source}=start
     const filterSourceData = await data.filter(
       (item) => item._id == start.draggableId
     );
-    console.log(filterSourceData);
-    setFilteredDropData(filterSourceData);
+    setPreviousStatusData(source.droppableId)
+    setFilteredDropData([{...filterSourceData[0]}]);
+      
   };
 
+console.log(filteredDropData)
   const onDragEnd = async(result) => {
     if (!result.destination) return;
-  await  dispatch(taskMove(result));
-  await  dispatch3(fetchUpdateTasks(filteredDropData));
     console.log(filteredDropData)
-   await dispatch4(fetchNoticationPost(filteredDropData[0]));
+  await  dispatch(taskMove(result));
+  await  dispatch(fetchUpdateTasks(filteredDropData));
+  setCountNotification(filteredDropData)
   };
 
   const onDragUpdate = (updateDestination) => {
+    console.log(updateDestination)
     const { destination } = updateDestination;
     const starttimeString = filteredDropData[0]?.startTime;
     const now = new Date().getTime();
     const finishTaskcalculate = new Date(starttimeString).getTime();
     const finishtask = now - finishTaskcalculate;
-
+    console.log(filteredDropData)
     const finishDays = Math.floor(finishtask / (1000 * 60 * 60 * 24));
     if (destination != null) {
       setFilteredDropData((prevState) => {
         return prevState.map((item) => ({
           ...item,
           status: destination.droppableId,
-          priviousStatus: item.status,
+          priviousStatus: previousStatusData,
           taskSubmissionDate: formattedDate,
           taskCompletionDate: finishDays,
           markNotification: "",
@@ -139,7 +140,7 @@ const ShowTask = ({
     const filterTaskQualityAssurance = tasks?.qualityAssurance?.items.filter(
       (x) => x.pinTask == "pinned" && x.status == pinTaskData.status
     );
-    const filterTaskDone = tasks?.done?.items.filter(
+    const filterTaskDone = tasks?.completed?.items.filter(
       (x) => x.pinTask == "pinned" && x.status == pinTaskData.status
     );
     console.log(
@@ -514,7 +515,7 @@ const ShowTask = ({
                                               {item?.deadlineDate}
                                             </b>
                                           </p>
-                                          {item.status == "done" ? (
+                                          {item.status == "completed" ? (
                                             <>
                                               <p className="text-black text-[15px]">
                                                 Task Complete Time:

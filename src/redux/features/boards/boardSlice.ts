@@ -102,7 +102,7 @@ const boardSlice = createSlice({
       isError: false,
       error: null,
     },
-    done: {
+    completed: {
       name: "Completed",
       items: [],
       isLoading: false,
@@ -159,12 +159,14 @@ const boardSlice = createSlice({
           (ele) => ele.status == "qualityAssurance"
         );
 
-        const dataCollection = allData?.filter((ele) => ele.status == "done");
+        const dataCollection = allData?.filter(
+          (ele) => ele.status == "completed"
+        );
         state.toDo.items = dataCollectionTodo;
         state.inProgress.items = dataCollectionInProggess;
         state.unitTest.items = dataCollectionUnitTest;
         state.qualityAssurance.items = dataCollectionQA;
-        state.done.items = dataCollection;
+        state.completed.items = dataCollection;
         state.toDo.isLoading = false;
         state.unitTest.isLoading = false;
       })
@@ -205,8 +207,8 @@ const boardSlice = createSlice({
             (item) => (item._id === action.payload._id ? action.payload : item)
           );
         }
-        if (action.payload.status == "done") {
-          state.done.items = state.done.items.map((item) =>
+        if (action.payload.status == "completed") {
+          state.completed.items = state.completed.items.map((item) =>
             item._id === action.payload._id ? action.payload : item
           );
         }
@@ -215,7 +217,7 @@ const boardSlice = createSlice({
         state.toDo.isLoading = false;
         state.inProgress.isLoading = false;
         state.qualityAssurance.isLoading = false;
-        state.done.isLoading = false;
+        state.completed.isLoading = false;
       })
 
       .addCase(fetchTaskDelete.pending, (state) => {
@@ -245,13 +247,15 @@ const boardSlice = createSlice({
             (ele) => ele._id !== id
           );
 
-          state.done.items = state.done.items.filter((ele) => ele._id !== id);
+          state.completed.items = state.completed.items.filter(
+            (ele) => ele._id !== id
+          );
         }
         state.toDo.isLoading = false;
         state.unitTest.isLoading = false;
         state.inProgress.isLoading = false;
         state.qualityAssurance.isLoading = false;
-        state.done.isLoading = false;
+        state.completed.isLoading = false;
       })
       .addCase(fetchTaskDelete.rejected, (state) => {
         state.toDo.isLoading = false;

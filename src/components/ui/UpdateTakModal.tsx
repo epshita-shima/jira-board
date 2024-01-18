@@ -20,7 +20,7 @@ console.log(stringWithoutSpaces);
       tasks.inProgress.items,
       tasks.unitTest.items,
       tasks.qualityAssurance.items,
-      tasks.done.items
+      tasks.completed.items
     );
     const filterMargeData=mergeResult.filter((data)=>(data.status.toLowerCase()==stringWithoutSpaces.toLowerCase()))
     console.log(filterMargeData)
@@ -30,7 +30,7 @@ console.log(stringWithoutSpaces);
     tasks.inProgress.items,
     tasks.unitTest.items,
     tasks.qualityAssurance.items,
-    tasks.done.items,
+    tasks.completed.items,
     stringWithoutSpaces
   ]);
 

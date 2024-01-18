@@ -31,6 +31,7 @@ const AddTask = ({
   const [dataOption, setDataOption] = useState([]);
   const [singleUpdateData, setSingleUpdateData] = useState([]);
 console.log(countNotification)
+
   const dispatch = useDispatch();
   // const userInfo = useSelector((state) => state.userView.data);
   const notification=useSelector((state) => state.notificationView.data);
@@ -52,26 +53,33 @@ console.log(countNotification)
   const formattedDate = year + "-" + month + "-" + day;
   const tasks = useSelector((state) => state.boardview);
   const stringWithoutSpaces = columnName.split(" ").join("");
+
   useEffect(() => {
     const mergeResult = [].concat(
-      tasks.unitTest.items,
       tasks.toDo.items,
       tasks.inProgress.items,
-      tasks.done.items
+      tasks.unitTest.items,
+      tasks.qualityAssurance.items,
+      tasks.completed.items
     );
+    console.log(mergeResult)
     const filterMargeData = mergeResult.filter(
       (data) => data.status.toLowerCase() == stringWithoutSpaces.toLowerCase()
     );
-    console.log(filterMargeData);
+    
+    
     setData(filterMargeData);
   }, [
-    tasks.unitTest.items,
     tasks.toDo.items,
     tasks.inProgress.items,
-    tasks.done.items,
+    tasks.unitTest.items,
+    tasks.qualityAssurance.items,
+    tasks.completed.items,
     stringWithoutSpaces,
+    setData,
+    countNotification
   ]);
-
+  console.log(data)
   useEffect(() => {
     dispatch(fetchTasks());
   }, [dispatch]);
@@ -98,6 +106,8 @@ console.log(countNotification)
   //   });
   //   setCountNotification(tempData);
   // }, [data, setCountNotification]);
+
+
 
   const handelAddTask = async (e: any) => {
     e.preventDefault();
@@ -228,7 +238,7 @@ console.log(countNotification)
               <FontAwesomeIcon icon={faBell}></FontAwesomeIcon>
             </button>
             <div className="counter absolute top-[10px] w-6 h-6 rounded-full bg-red-500 text-white text-center">
-              {notification.length}
+              {countNotification.length}
             </div>
           </div>
           <button
@@ -262,7 +272,7 @@ console.log(countNotification)
                       className="p-1 ml-auto bg-transparent border-0 text-black  float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
                       onClick={() => {
                         setShowModal(false);
-                        setShowFormData(!showFormData);
+                        setShowFormData(true);
                         setSingleUpdateData({
                           _id: "",
                           deadlineDate: "",
