@@ -13,7 +13,6 @@ const [countNotification, setCountNotification] = useState([]);
 const [notificationModal, setNotificationModal] = useState(false);
   return (
     <div className="mx-auto containers" >
-     {/* <BoardsDesign></BoardsDesign> */}
      <AddTask showModal={showModal}
    setShowModal={setShowModal}
    showUpdate={showUpdate}
@@ -26,7 +25,6 @@ const [notificationModal, setNotificationModal] = useState(false);
    setNotificationModal={setNotificationModal}
    ></AddTask>
   
-  {/* <Treeview></Treeview> */}
   <ShowTask 
    setShowModal={setShowModal}
    setShowUpdate={setShowUpdate}
@@ -35,10 +33,6 @@ const [notificationModal, setNotificationModal] = useState(false);
    setDeleteTaskModal={setDeleteTaskModal}
    columnName={columnName}
    setColumnName={setColumnName}
-   countNotification={countNotification} 
-   setCountNotification={setCountNotification}
-   notificationModal={notificationModal} 
-   setNotificationModal={setNotificationModal}
    ></ShowTask>
   <Footer></Footer>
     </div>

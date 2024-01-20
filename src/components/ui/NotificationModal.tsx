@@ -18,10 +18,7 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
   const [expanDate, setExpanDate] = useState("");
   const [notificationData,setNotificationData] = useState([]);
   const dispatch = useDispatch();
-  console.log(countNotification);
-  console.log(endDate);
   const tasks = useSelector((state) => state.boardview);
-  console.log(countNotification);
   useEffect(() => {
     const mergeResult = [].concat(
       tasks.toDo.items,
@@ -30,8 +27,7 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
       tasks.qualityAssurance.items,
       tasks.completed.items
     );
-    const filterNotificationData=mergeResult.filter((data)=>(data.markNotification == ""))
-    console.log(filterNotificationData)
+    const filterNotificationData=mergeResult.filter((data)=>(data.markNotification == "" ||  data.markNotification == 'viewed'))
     setNotificationData(filterNotificationData)
   }, [
     tasks.toDo.items,
@@ -49,13 +45,13 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
     setSingleId(id._id);
   };
 
-  useEffect(() => {
-    if (countNotification.length == 0) {
-      setNotificationModal(false);
-    }
-  }, [countNotification.length, setNotificationModal]);
+  // useEffect(() => {
+  //   if (countNotification.length == 0) {
+  //     setNotificationModal(false);
+  //   }
+  // }, [countNotification.length, setNotificationModal]);
 
-  const handleUpdateTaskDate = async (e) => {
+  const handleUpdateTaskDate =  (e) => {
     e.preventDefault();
     const comments = e.target.msg.value;
     // const expandDate = e.target.expandDate.value;
@@ -75,8 +71,7 @@ const NotificationModal = ({ setNotificationModal, countNotification }) => {
       taskSubmissionDate:singleItem.taskSubmissionDate,
       taskCompletionDate:singleItem.taskCompletionDate,
     };
-    console.log(updateData);
-    await dispatch(fetchTaskById(updateData));
+   dispatch(fetchTaskById(updateData));
     swal("Not approve yet.", "Admin will check and let you know..", "success");
     setUpdateEstimateDate(false);
   };
@@ -96,12 +91,10 @@ const handleNotificationViewData=async(data)=>{
     taskSubmissionDate:data.taskSubmissionDate,
     taskCompletionDate:data.taskCompletionDate,
   };
-  console.log(updateData);
     await dispatch(fetchTaskById(updateData));
   
 }
   useEffect(() => {
-    console.log(singleItem?.deadlineDate);
     const newDates = new Date(singleItem?.deadlineDate);
     newDates.setDate(newDates.getDate() + 10);
     
@@ -145,12 +138,10 @@ const handleNotificationViewData=async(data)=>{
 
             <div className="relative flex-auto justify-between items-center mx-auto rounded-xl p-4">
               {notificationData?.map((item, index) => {
-                console.log(item);
 
                 // const findMatchingIndices = (data, countNotification) => {
                 //   const matchingIndices = [];
                 //   data.forEach((element, index) => {
-                //     console.log();
                 //     if (countNotification.includes(element)) {
                 //       matchingIndices.push(index + 1);
                 //     }
@@ -162,7 +153,6 @@ const handleNotificationViewData=async(data)=>{
                 //   data,
                 //   countNotification
                 // );
-                // console.log(matchingIndices);
                 return (
                   <div className={` flex justify-between   items-center  text-black border-b-2  px-4 py-2 ${item.markNotification =="" ? 'bg-slate-200' : 'bg-white' }`}>
                     <div className="w-[70%]">
@@ -172,9 +162,9 @@ const handleNotificationViewData=async(data)=>{
                         state is
                         <mark> {item.task}</mark>&nbsp;
                       
-                      time will expired within 2 days
+                      {/* time will expired within 2 days */}
                     </div>
-                    <button
+                    {/* <button
                       className=" px-2 py-1 text-black font-bold bg-gray-100 rounded"
                       onClick={() => {
                         handleGetSingleData(item);
@@ -184,7 +174,7 @@ const handleNotificationViewData=async(data)=>{
                       }}
                     >
                       Mark as Read
-                    </button>
+                    </button> */}
                     <button
                       className=" px-2 py-1 text-black font-bold bg-gray-100 rounded"
                       onClick={() => {

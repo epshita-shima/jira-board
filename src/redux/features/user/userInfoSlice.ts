@@ -3,7 +3,9 @@ import axios from "axios";
 
 export const fetchUserInfo = createAsyncThunk("getInfo", async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/info`);
+    const response = await axios.get(
+      `https://todo-list-server-production-e6e8.up.railway.app/info`
+    );
     console.log(response.data);
     return response.data;
   } catch (error) {
@@ -15,7 +17,9 @@ export const fetchUserInfoDetails = createAsyncThunk(
   "getUserInfo",
   async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/info`);
+      const response = await axios.get(
+        `https://todo-list-server-production-e6e8.up.railway.app/info`
+      );
       console.log(response.data);
       return response.data;
     } catch (error) {
@@ -29,7 +33,10 @@ export const fetchUserInfoPost = createAsyncThunk(
   async (data) => {
     console.log(data);
     try {
-      const response = await axios.post(`http://localhost:5000/info`, data);
+      const response = await axios.post(
+        `https://todo-list-server-production-e6e8.up.railway.app/info`,
+        data
+      );
       const insertData = JSON.parse(response.config.data);
       return insertData;
     } catch (error) {

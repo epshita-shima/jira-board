@@ -15,11 +15,8 @@ import { useSelector } from "react-redux";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import "./Showtask.css";
 import swal from "sweetalert";
-import {
-  fetchNoticationPost,
-  fetchNotificationGet,
-} from "../../redux/features/notification/notificationSlice";
-import NotificationModal from "./NotificationModal";
+
+
 
 const ShowTask = ({
   setShowModal,
@@ -29,7 +26,6 @@ const ShowTask = ({
   setDeleteTaskModal,
   columnName,
   setColumnName,
-  countNotification, setCountNotification
 }) => {
   const [data, setData] = useState([]);
   const dispatch = useDispatch<AppDispatch>();
@@ -40,7 +36,6 @@ const ShowTask = ({
 
   const tasks = useSelector((state) => state.boardview);
   const columns = tasks;
-  console.log(columns)
 
   const date_data = startDate;
   const newDate = new Date(date_data);
@@ -76,7 +71,6 @@ const ShowTask = ({
     const fetchData = async () => {
       try {
         await dispatch(fetchTasks());
-        await dispatch(fetchNotificationGet());
       } catch (error) {
         console.error('Error fetching data:', error.message);
       }
@@ -94,23 +88,19 @@ const ShowTask = ({
       
   };
 
-console.log(filteredDropData)
   const onDragEnd = async(result) => {
     if (!result.destination) return;
-    console.log(filteredDropData)
   await  dispatch(taskMove(result));
   await  dispatch(fetchUpdateTasks(filteredDropData));
-  setCountNotification(filteredDropData)
+  // setCountNotification(filteredDropData)
   };
 
   const onDragUpdate = (updateDestination) => {
-    console.log(updateDestination)
     const { destination } = updateDestination;
     const starttimeString = filteredDropData[0]?.startTime;
     const now = new Date().getTime();
     const finishTaskcalculate = new Date(starttimeString).getTime();
     const finishtask = now - finishTaskcalculate;
-    console.log(filteredDropData)
     const finishDays = Math.floor(finishtask / (1000 * 60 * 60 * 24));
     if (destination != null) {
       setFilteredDropData((prevState) => {
@@ -127,7 +117,6 @@ console.log(filteredDropData)
   };
 
   const handlePinTask = () => {
-    console.log("click");
     const filterTaskTodo = tasks.toDo.items.filter(
       (x) => x.pinTask == "pinned" && x.status == pinTaskData.status
     );
@@ -143,13 +132,7 @@ console.log(filteredDropData)
     const filterTaskDone = tasks?.completed?.items.filter(
       (x) => x.pinTask == "pinned" && x.status == pinTaskData.status
     );
-    console.log(
-      filterTaskTodo?.length,
-      filterTaskInprogress?.length,
-      filterTaskUnittest?.length,
-      filterTaskQualityAssurance?.length,
-      filterTaskDone?.length
-    );
+
     if (
       filterTaskTodo.length > 0 ||
       filterTaskInprogress.length > 0 ||
@@ -185,7 +168,6 @@ console.log(filteredDropData)
       >
         {Object.entries(columns)?.map(([columnId]) => {
           const column = columns[columnId];
-          console.log(column)
           return (
             // <div c lassName="flex">
             <div

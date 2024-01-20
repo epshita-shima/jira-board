@@ -30,14 +30,8 @@ const AddTask = ({
   const [data, setData] = useState([]);
   const [dataOption, setDataOption] = useState([]);
   const [singleUpdateData, setSingleUpdateData] = useState([]);
-console.log(countNotification)
-
   const dispatch = useDispatch();
-  // const userInfo = useSelector((state) => state.userView.data);
-  const notification=useSelector((state) => state.notificationView.data);
-  console.log(notification)
   const userLocalData = sessionStorage.getItem("userInfo");
-  console.log(userLocalData);
 
   const date_data = startDate;
   const newDate = new Date(date_data);
@@ -62,12 +56,12 @@ console.log(countNotification)
       tasks.qualityAssurance.items,
       tasks.completed.items
     );
-    console.log(mergeResult)
     const filterMargeData = mergeResult.filter(
       (data) => data.status.toLowerCase() == stringWithoutSpaces.toLowerCase()
     );
     
-    
+    const filterNotificationData=mergeResult.filter((data)=>(data.markNotification == ""))
+    setCountNotification(filterNotificationData)
     setData(filterMargeData);
   }, [
     tasks.toDo.items,
@@ -76,10 +70,8 @@ console.log(countNotification)
     tasks.qualityAssurance.items,
     tasks.completed.items,
     stringWithoutSpaces,
-    setData,
-    countNotification
+    setData,setCountNotification
   ]);
-  console.log(data)
   useEffect(() => {
     dispatch(fetchTasks());
   }, [dispatch]);
@@ -114,7 +106,6 @@ console.log(countNotification)
     const task = e.target.name.value;
     const time = e.target.time.value;
     const date = e.target.date.value;
-    console.log(priorityValue);
     if (showUpdate == true) {
       await dispatch(fetchTaskById(singleUpdateData));
       swal({
@@ -150,7 +141,6 @@ console.log(countNotification)
           button: "OK",
         });
       } else {
-        console.log(taskDetails);
         // await addtask(taskDetails);
         await dispatch(fetchTasksPost(taskDetails));
         e.target.name.value = "";
@@ -181,7 +171,6 @@ console.log(countNotification)
     });
     setDataOption(newArray);
   }, [data]);
-  console.log(singleUpdateData);
 
   return (
     <>
@@ -421,7 +410,6 @@ console.log(countNotification)
                           disabled={showFormData}
                           value={showUpdate ? singleUpdateData.time : null}
                           onChange={(e) => {
-                            console.log(e.target.value);
                             showUpdate
                               ? setSingleUpdateData({
                                   _id: singleUpdateData._id,
@@ -510,7 +498,7 @@ console.log(countNotification)
           </>
         ) : null}
       </form>
-      {notificationModal && notification.length != 0 ? (
+      {notificationModal  ? (
         <NotificationModal
           setNotificationModal={setNotificationModal}
           countNotification={countNotification}

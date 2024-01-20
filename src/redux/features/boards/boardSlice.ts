@@ -3,8 +3,9 @@ import axios from "axios";
 
 export const fetchTasks = createAsyncThunk("getData", async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/task`);
-    console.log(response.data);
+    const response = await axios.get(
+      `https://todo-list-server-production-e6e8.up.railway.app/task`
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching tasks:", error);
@@ -13,9 +14,11 @@ export const fetchTasks = createAsyncThunk("getData", async () => {
 });
 
 export const fetchTasksPost = createAsyncThunk("insertData", async (data) => {
-  console.log(data);
   try {
-    const response = await axios.post(`http://localhost:5000/task`, data);
+    const response = await axios.post(
+      `https://todo-list-server-production-e6e8.up.railway.app/task`,
+      data
+    );
     const insertData = JSON.parse(response.config.data);
     return insertData;
   } catch (error) {
@@ -25,15 +28,14 @@ export const fetchTasksPost = createAsyncThunk("insertData", async (data) => {
 });
 
 export const fetchTaskById = createAsyncThunk("updateData", async (data) => {
-  console.log(data);
   try {
-    const response = await axios.put(`http://localhost:5000/task/${data._id}`, {
-      data,
-    });
-
-    console.log(response);
+    const response = await axios.put(
+      `https://todo-list-server-production-e6e8.up.railway.app/task/${data._id}`,
+      {
+        data,
+      }
+    );
     const validData = JSON.parse(response.config.data);
-    console.log(validData.data);
     return validData.data;
   } catch (error) {
     console.error("Error fetching tasks:", error);
@@ -42,9 +44,10 @@ export const fetchTaskById = createAsyncThunk("updateData", async (data) => {
 });
 
 export const fetchTaskDelete = createAsyncThunk("deleteData", async (id) => {
-  console.log(id);
   try {
-    const response = await axios.delete(`http://localhost:5000/task/${id}`);
+    const response = await axios.delete(
+      `https://todo-list-server-production-e6e8.up.railway.app/task/${id}`
+    );
     console.log(response);
   } catch (error) {
     console.error("Error fetching tasks:", error);
@@ -54,14 +57,16 @@ export const fetchTaskDelete = createAsyncThunk("deleteData", async (id) => {
 
 //drag and drop
 export const fetchUpdateTasks = createAsyncThunk("update", async (data) => {
-  console.log(data);
-  const response = await fetch(`http://localhost:5000/project`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data[0]),
-  });
+  const response = await fetch(
+    `https://todo-list-server-production-e6e8.up.railway.app/project`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data[0]),
+    }
+  );
   try {
     const result = await response.json();
     return result;
@@ -113,25 +118,15 @@ const boardSlice = createSlice({
   reducers: {
     taskMove: (state = initialState, action) => {
       const { source, destination } = action.payload;
-      console.log("source", source);
-      console.log("destination", destination);
-      console.log("sourceList", state[source.droppableId].items);
-      console.log("destinationList", state[destination.droppableId].items);
       if (source.droppableId != destination.droppableId) {
         const sourceList = state[source.droppableId].items;
-        console.log(sourceList);
         const destinationList = state[destination.droppableId].items;
         const [movedItem] = sourceList.splice(source.index, 1);
         destinationList.splice(destination.index, 0, movedItem);
       } else {
-        console.log("source", source);
-        console.log("destination", destination);
         const column = state[source.droppableId].items;
-        console.log(column);
         const copiedItems = [...column.items];
-        console.log(copiedItems);
         const [removed] = copiedItems.splice(source.index, 1);
-        console.log(removed);
         copiedItems.splice(destination.index, 0, removed);
       }
     },
@@ -190,7 +185,6 @@ const boardSlice = createSlice({
           state.unitTest.items = state.unitTest.items.map((item) =>
             item._id === action.payload._id ? action.payload : item
           );
-          console.log(state.unitTest.items);
         }
         if (action.payload.status == "toDo") {
           state.toDo.items = state.toDo.items.map((item) =>
@@ -229,13 +223,9 @@ const boardSlice = createSlice({
         state.toDo.error = null;
       })
       .addCase(fetchTaskDelete.fulfilled, (state, action) => {
-        console.log(state);
-        console.log(action.meta.arg);
-
         const id = action.meta.arg;
         if (id) {
           state.toDo.items = state.toDo.items.filter((ele) => ele._id !== id);
-          console.log(state.toDo.items);
 
           state.qualityAssurance.items = state.qualityAssurance.items.filter(
             (ele) => ele._id !== id
